@@ -1,0 +1,98 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-input/paper-textarea.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/iron-collapse/iron-collapse.html">
+<link rel="import" href="shared-styles.html">
+
+<dom-module id="my-login">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+      }
+
+      .navBtn{
+        text-align:center;
+        display:block;
+      }
+    </style>
+
+    <div class="card">
+
+      <iron-collapse id="patientLoginBtn" opened="true">
+        <paper-button class="navBtn" on-tap="_togglePatientLogin">患者としてログイン/登録</paper-button>
+      </iron-collapse>
+
+      <iron-collapse id="patientLogin">
+        <paper-input  label="メールアドレス"></paper-input>
+        <paper-input label="パスワード" type="password"></paper-input>
+        <paper-button class="mainBtn" raised>ログイン</paper-button>
+        <paper-button>新規登録</paper-button>
+      </iron-collapse>
+
+      <iron-collapse id="patientRegister">
+        <paper-input label="名前"></paper-input>
+        <paper-input label="ふりがな"></paper-input>
+        <paper-input label="生年月日"></paper-input>
+        <paper-input label="職業"></paper-input>
+        <paper-input label="現住所"></paper-input>
+        <paper-input label="電話番号"></paper-input>
+        <paper-textarea label="スポーツ歴"></paper-textarea>
+        <paper-button raised class="mainBtn">登録</paper-button>
+      </iron-collapse>
+
+      
+      <iron-collapse id="hospitalLoginBtn" opened="true">
+        <paper-button class="navBtn" on-tap="_toggleHospitalLogin">治療院としてログイン/登録</paper-button>
+      </iron-collapse>
+  
+      <iron-collapse id="hospitalLogin">
+        <paper-input  label="メールアドレス"></paper-input>
+        <paper-input label="パスワード" type="password"></paper-input>
+        <paper-button class="mainBtn" raised>ログイン</paper-button>
+        <paper-button>新規登録</paper-button>
+      </iron-collapse>
+
+      <iron-collapse id="hospitalRegister">
+        <paper-input label="治療院名"></paper-input>
+        <paper-input label="代表者氏名"></paper-input>
+        <paper-input label="住所"></paper-input>
+        <paper-input label="電話番号"></paper-input>
+        <paper-button raised class="mainBtn">登録</paper-button>
+      </iron-collapse>
+
+
+    </div>
+  </template>
+
+  <script>
+    class MyLogin extends Polymer.Element {
+      static get is() { return 'my-login'; }
+  
+    _togglePatientLogin(){
+        this.$.patientLogin.toggle()
+        this.$.hospitalLoginBtn.toggle()
+      }
+
+      _toggleHospitalLogin(){
+        this.$.hospitalLogin.toggle()
+        this.$.patientLoginBtn.toggle()
+      }
+
+    }
+
+
+    window.customElements.define(MyLogin.is, MyLogin);
+  </script>
+</dom-module>

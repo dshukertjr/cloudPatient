@@ -9,26 +9,43 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 -->
 
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-input/paper-textarea.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/iron-collapse/iron-collapse.html">
 <link rel="import" href="shared-styles.html">
 
-<dom-module id="my-view1">
+<dom-module id="my-hearing">
   <template>
     <style include="shared-styles">
       :host {
         display: block;
       }
+
+      #inspectImg{
+        display:block;
+        width:100%;
+      }
     </style>
 
     <div class="card">
+
+    <p>痛みや不安のあるところをタップしてください。</p>
+    <div id="inspectImgWrapper">
+      <img id="inspectImg" src="../images/assets/inspect.png" />
+    </div>
 
     </div>
   </template>
 
   <script>
-    class MyView1 extends Polymer.Element {
-      static get is() { return 'my-view1'; }
+    class MyHearing extends Polymer.Element {
+      static get is() { return 'my-hearing'; }
+  
+
     }
 
-    window.customElements.define(MyView1.is, MyView1);
+
+    window.customElements.define(MyHearing.is, MyHearing);
   </script>
 </dom-module>

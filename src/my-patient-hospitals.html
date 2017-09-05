@@ -11,7 +11,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
 <link rel="import" href="shared-styles.html">
 
-<dom-module id="my-view1">
+<dom-module id="my-patient-hospitals">
   <template>
     <style include="shared-styles">
       :host {
@@ -25,10 +25,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   </template>
 
   <script>
-    class MyView1 extends Polymer.Element {
-      static get is() { return 'my-view1'; }
+    class MyPatientHospitals extends Polymer.Element {
+      static get is() { return 'my-patient-hospitals'; }
     }
 
-    window.customElements.define(MyView1.is, MyView1);
+    window.customElements.define(MyPatientHospitals.is, MyPatientHospitals);
   </script>
 </dom-module>
