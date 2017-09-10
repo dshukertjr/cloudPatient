@@ -13,6 +13,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/paper-input/paper-textarea.html">
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../bower_components/iron-collapse/iron-collapse.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-document.html">
 <link rel="import" href="shared-styles.html">
 
 <dom-module id="my-login">
@@ -26,52 +28,77 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         text-align:center;
         display:block;
       }
+
+      #signOutButton{
+        width:100%;
+        margin-top:50px;
+      }
     </style>
+
+    <firebase-auth
+    id="auth"
+    user="{{user}}"
+    on-error="handleError">
+    </firebase-auth>
+
+    <firebase-document
+      id="userMeta"
+      path="/users/[[user.uid]]/type"
+      data="{{userMeta}}">
+    </firebase-document>
+
+    <firebase-document
+      id="userProfile"
+      path="/users/[[user.uid]]/profile"
+      data="{{userProfile}}">
+    </firebase-document>
+
 
     <div class="card">
 
-      <iron-collapse id="patientLoginBtn" opened="true">
+      <iron-collapse id="patientLoginBtn">
         <paper-button class="navBtn" on-tap="_togglePatientLogin">患者としてログイン/登録</paper-button>
       </iron-collapse>
 
       <iron-collapse id="patientLogin">
-        <paper-input  label="メールアドレス"></paper-input>
-        <paper-input label="パスワード" type="password"></paper-input>
-        <paper-button class="mainBtn" raised>ログイン</paper-button>
-        <paper-button>新規登録</paper-button>
+        <paper-input id="patientEmail" label="メールアドレス" required auto-validate></paper-input>
+        <paper-input id="patientPassword" label="パスワード" type="password" required auto-validate></paper-input>
+        <paper-button on-tap="loginPatient" class="mainBtn" raised>ログイン</paper-button>
+        <paper-button on-tap="createPatient">新規登録</paper-button>
       </iron-collapse>
 
       <iron-collapse id="patientRegister">
-        <paper-input label="名前"></paper-input>
-        <paper-input label="ふりがな"></paper-input>
-        <paper-input label="生年月日"></paper-input>
-        <paper-input label="職業"></paper-input>
-        <paper-input label="現住所"></paper-input>
-        <paper-input label="電話番号"></paper-input>
-        <paper-textarea label="スポーツ歴"></paper-textarea>
-        <paper-button raised class="mainBtn">登録</paper-button>
+        <paper-input id="patientName" value="[[userProfile.patientName]]" label="名前" required auto-validate></paper-input>
+        <paper-input id="patientHurigana" value="[[userProfile.patientHurigana]]" label="ふりがな" required auto-validate></paper-input>
+        <paper-input id="patientBirthday" value="[[userProfile.patientBirthday]]" label="生年月日" required auto-validate></paper-input>
+        <paper-input id="patientJob" value="[[userProfile.patientJob]]" label="職業" required auto-validate></paper-input>
+        <paper-input id="patientAddress" value="[[userProfile.patientAddress]]" label="現住所" required auto-validate></paper-input>
+        <paper-input id="patientPhoneNumber" value="[[userProfile.patientPhoneNumber]]" label="電話番号" required auto-validate></paper-input>
+        <paper-textarea id="patientSportsHistory" value="[[userProfile.patientSportsHistory]]" label="スポーツ歴" required auto-validate></paper-textarea>
+        <paper-button on-tap="inputPatient" raised class="mainBtn">登録</paper-button>
       </iron-collapse>
 
       
-      <iron-collapse id="hospitalLoginBtn" opened="true">
+      <iron-collapse id="hospitalLoginBtn">
         <paper-button class="navBtn" on-tap="_toggleHospitalLogin">治療院としてログイン/登録</paper-button>
       </iron-collapse>
   
       <iron-collapse id="hospitalLogin">
-        <paper-input  label="メールアドレス"></paper-input>
-        <paper-input label="パスワード" type="password"></paper-input>
-        <paper-button class="mainBtn" raised>ログイン</paper-button>
-        <paper-button>新規登録</paper-button>
+        <paper-input id="hospitalEmail" label="メールアドレス" required auto-validate></paper-input>
+        <paper-input id="hospitalPassword" label="パスワード" type="password" required auto-validate></paper-input>
+        <paper-button on-tap="loginHospital" class="mainBtn" raised>ログイン</paper-button>
+        <paper-button on-tap="createHospital">新規登録</paper-button>
       </iron-collapse>
 
       <iron-collapse id="hospitalRegister">
-        <paper-input label="治療院名"></paper-input>
-        <paper-input label="代表者氏名"></paper-input>
-        <paper-input label="住所"></paper-input>
-        <paper-input label="電話番号"></paper-input>
-        <paper-button raised class="mainBtn">登録</paper-button>
+        <paper-input id="hospitalName" value="[[userProfile.hospitalName]]" label="治療院名" required auto-validate></paper-input>
+        <paper-input id="hospitalRepresentativeName" value="[[userProfile.hospitalRepresentativeName]]" label="代表者氏名" required auto-validate></paper-input>
+        <paper-input id="hospitalAddress" value="[[userProfile.hospitalAddress]]" label="住所" required auto-validate></paper-input>
+        <paper-input id="hospitalPhoneNumber" value="[[userProfile.hospitalPhoneNumber]]" label="電話番号" required auto-validate></paper-input>
+        <paper-button on-tap="inputHospital" raised class="mainBtn">登録</paper-button>
       </iron-collapse>
 
+      <paper-button id="signOutButton" hidden="[[!user]]" on-tap="signOut">ログアウト</paper-button>
 
     </div>
   </template>
@@ -79,7 +106,21 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   <script>
     class MyLogin extends Polymer.Element {
       static get is() { return 'my-login'; }
-  
+
+      static get properties() {
+        return {
+          user: {
+            type: Object,
+            observer: '_userChanged'
+          },
+          userMeta: {
+            type: Object,
+            observer: '_userMetaChanged'
+          },
+          userProfile: Object
+        }
+      }
+
     _togglePatientLogin(){
         this.$.patientLogin.toggle()
         this.$.hospitalLoginBtn.toggle()
@@ -90,9 +131,140 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this.$.patientLoginBtn.toggle()
       }
 
+      _userChanged(){
+        console.log(this.user)
+        if(this.user){
+          this.$.patientLoginBtn.hide()
+          this.$.patientLogin.hide()
+          this.$.hospitalLoginBtn.hide()
+          this.$.hospitalLogin.hide()
+        }else{
+          this.$.patientRegister.hide()
+          this.$.hospitalRegister.hide()
+          this.$.patientLogin.hide()
+          this.$.hospitalLogin.hide()
+          this.$.patientLoginBtn.show()
+          this.$.hospitalLoginBtn.show()
+        }
+      }
+
+      _userMetaChanged(){
+        console.log("called")
+        if(this.userMeta == "patient"){
+          this.$.patientRegister.show()
+          this.$.hospitalRegister.hide()
+        }else if(this.userMeta == "hospital"){
+          this.$.patientRegister.hide()
+          this.$.hospitalRegister.show()
+        }else{
+          this.$.patientRegister.hide()
+          this.$.hospitalRegister.hide()
+        }
+      }
+
+      loginPatient(){
+        const that = this
+        const email = this.$.patientEmail.value
+        const password = this.$.patientPassword.value
+        this.$.auth.signInWithEmailAndPassword(email, password)
+        .then(function(response){
+
+        })
+        .catch(function(error){
+          console.log(error)
+        })
+      }
+
+      createPatient(){
+        const that = this
+        const email = this.$.patientEmail.value
+        const password = this.$.patientPassword.value
+        this.$.auth.createUserWithEmailAndPassword(email, password)
+        .then(function(response){
+          that.$.patientLogin.hide()
+          that.$.hospitalLogin.hide()
+          that.$.patientRegister.show()
+          const ref = window.firebase.database().ref().child("users/" + response.uid)
+          ref.set({type: "patient"})
+        })
+        .catch(function(error){
+          console.log(error)
+        })
+      }
+
+      loginHospital(){
+        const that = this
+        const email = this.$.hospitalEmail.value
+        const password = this.$.hospitalPassword.value
+        this.$.auth.signInWithEmailAndPassword(email, password)
+        .then(function(response){
+
+        })
+        .catch(function(error){
+          console.log(error)
+        })
+      }
+
+      createHospital(){
+        const that = this
+        const email = this.$.hospitalEmail.value
+        const password = this.$.hospitalPassword.value
+        this.$.auth.createUserWithEmailAndPassword(email, password)
+        .then(function(response){
+          that.$.patientLogin.hide()
+          that.$.hospitalLogin.hide()
+          that.$.hospitalRegister.show()
+          const ref = window.firebase.database().ref().child("users/" + response.uid)
+          ref.set({type: "hospital"})
+        })
+        .catch(function(error){
+          console.log(error)
+        })
+      }
+
+      inputPatient(){
+        const patientName = this.$.patientName.value
+        const patientHurigana = this.$.patientHurigana.value
+        const patientBirthday = this.$.patientBirthday.value
+        const patientJob = this.$.patientJob.value
+        const patientAddress = this.$.patientAddress.value
+        const patientPhoneNumber = this.$.patientPhoneNumber.value
+        const patientSportsHistory = this.$.patientSportsHistory.value
+        if(!this.user || !patientName || !patientHurigana || !patientBirthday || !patientJob || !patientAddress || !patientPhoneNumber || !patientSportsHistory) return
+        const info = {
+          patientName: patientName,
+          patientHurigana: patientHurigana,
+          patientBirthday: patientBirthday,
+          patientJob: patientJob,
+          patientAddress: patientAddress,
+          patientPhoneNumber: patientPhoneNumber,
+          patientSportsHistory: patientSportsHistory
+        }
+        window.firebase.database().ref().child("users/" + this.user.uid + "/profile").set(info)
+      }
+
+      inputHospital(){
+        const hospitalName = this.$.hospitalName.value
+        const hospitalRepresentativeName = this.$.hospitalRepresentativeName.value
+        const hospitalAddress = this.$.hospitalAddress.value
+        const hospitalPhoneNumber = this.$.hospitalPhoneNumber.value
+        if(!this.user || !hospitalName || !hospitalRepresentativeName || !hospitalAddress || !hospitalPhoneNumber) return
+        const info = {
+          hospitalName: hospitalName,
+          hospitalRepresentativeName: hospitalRepresentativeName,
+          hospitalAddress: hospitalAddress,
+          hospitalPhoneNumber: hospitalPhoneNumber
+        }
+        window.firebase.database().ref().child("users/" + this.user.uid + "/profile").set(info)
+      }
+
+      signOut(){
+        this.$.auth.signOut()
+      }
+
     }
 
 
-    window.customElements.define(MyLogin.is, MyLogin);
+    window.customElements.define(MyLogin.is, MyLogin)
   </script>
 </dom-module>

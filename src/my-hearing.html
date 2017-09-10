@@ -13,6 +13,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/paper-input/paper-textarea.html">
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../bower_components/iron-collapse/iron-collapse.html">
+<link rel="import" href="../bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
+<link rel="import" href="../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
+<link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
 <link rel="import" href="shared-styles.html">
 
 <dom-module id="my-hearing">
@@ -26,14 +30,146 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         display:block;
         width:100%;
       }
+
+      #inspectImgWrapper{
+        position:relative;
+      }
+
+      #redDot{
+        background:red;
+        width:20px;
+        height:20px;
+        border-radius:50%;
+        position:absolute;
+        box-shadow: 0 0 5px red;
+        opacity:0;
+      }
+
+      .card>iron-collapse>div{
+        margin:40px 0;
+      }
+
+      .card>iron-collapse>div>p{
+        margin:0;
+      }
+
+      #submitButton{
+        width:100%;
+      }
     </style>
+
+    <firebase-auth
+    id="auth"
+    user="{{user}}"
+    on-error="handleError">
+    </firebase-auth>
 
     <div class="card">
 
-    <p>痛みや不安のあるところをタップしてください。</p>
-    <div id="inspectImgWrapper">
-      <img id="inspectImg" src="../images/assets/inspect.png" />
-    </div>
+      <iron-collapse id="afterMessage">
+        <div>
+          問診票のご記入ありがとうございました。係りの者から呼ばれるまでお待ちください。
+        </div>
+      </iron-collapse>
+
+      <iron-collapse id="form" opened>
+        
+        <p>痛みや不安のあるところをタップしてください。</p>
+        <div id="inspectImgWrapper">
+          <div id="redDot"></div>
+          <img id="inspectImg" on-click="placeRed" src="../images/assets/inspect.png" />
+        </div>
+
+        <div>
+          <p>治療によって快適な身体を手に入れた後の目標、目的を教えてください。</p>
+          <paper-textarea label="ここに入力" required auto-validate id="afterHealthyBody"></paper-textarea>
+        </div>
+
+        <div>
+          <paper-dropdown-menu required auto-validate id="howLong" label="どのくらい前から痛みますか？">
+            <paper-listbox slot="dropdown-content">
+              <paper-item>1ヶ月以上前</paper-item>
+              <paper-item>2週間前</paper-item>
+              <paper-item>1週間前</paper-item>
+              <paper-item>昨日</paper-item>
+            </paper-listbox>
+          </paper-dropdown-menu>
+        </div>
+
+        <div>
+          <paper-dropdown-menu required id="happenedWhere" label="どこでそのようになりましたか？">
+            <paper-listbox slot="dropdown-content">
+              <paper-item>自宅</paper-item>
+              <paper-item>会社</paper-item>
+              <paper-item>学校</paper-item>
+              <paper-item>路上</paper-item>
+              <paper-item>その他</paper-item>
+            </paper-listbox>
+          </paper-dropdown-menu>
+        </div>
+
+        <div>
+          <p>何をしてて痛くなりましたか？</p>
+          <paper-textareav required auto-validate id="fromWhat"></paper-textarea>
+        </div>
+        <div>
+          <p>今までかかった病気（手術など）はございますか？</p>
+          <paper-textareav required auto-validate id="anyDisease"></paper-textarea>
+        </div>
+
+        <div>
+          <p>当院では通院時間の取れない方、痛みが取れず困っている方、より早く痛みから逃れたい方のために、ご相談後、特別治療を導入しております。<br />通常の保険治療に比べて早く治すことが可能です。ご希望の方を選択してください。</p>
+          <paper-dropdown-menu id="fastOrSlow" label="選択肢より選んでください。">
+            <paper-listbox slot="dropdown-content">
+              <paper-item>短い期間で痛みを早くなおしたい</paper-item>
+              <paper-item>長い期間をかけてゆっくり治療をおこないたい</paper-item>
+            </paper-listbox>
+          </paper-dropdown-menu>
+        </div>
+
+        <div>
+        <p>どちらで当院をお知りになりましたか？</p>
+          <paper-dropdown-menu required id="foundOutHow" on-value-changed="additionalCheck" label="選択肢より選んでください。">
+            <paper-listbox slot="dropdown-content">
+              <paper-item>紹介</paper-item>
+              <paper-item>近いから</paper-item>
+              <paper-item>過去に受診</paper-item>
+              <paper-item>エキテン</paper-item>
+              <paper-item>街ネタ</paper-item>
+              <paper-item>当院ブログ</paper-item>
+              <paper-item>タウンページ</paper-item>
+              <paper-item>店頭看板</paper-item>
+              <paper-item>チラシ・小冊子</paper-item>
+              <paper-item>試合会場で知った</paper-item>
+              <paper-item>当院ホームページ</paper-item>
+            </paper-listbox>
+          </paper-dropdown-menu>
+          <paper-textarea hidden="true" id="additionalFoundOutHow"></paper-textarea>
+        </div>
+
+        <div>
+          <p>※女性の方のみにお聞きします。今、妊娠またはその可能性はありますか？</p>
+          <paper-dropdown-menu required id="possiblyPregnant" label="選択肢より選んでください。">
+            <paper-listbox slot="dropdown-content">
+              <paper-item>ない</paper-item>
+              <paper-item>ある</paper-item>
+            </paper-listbox>
+          </paper-dropdown-menu>
+        </div>
+
+        <div>
+          <paper-dropdown-menu  required id="introduceProfessional" label="症状によっては、総合病院・専門病院への紹介を希望されますか？">
+            <paper-listbox slot="dropdown-content">
+              <paper-item>希望する</paper-item>
+              <paper-item>希望しない</paper-item>
+            </paper-listbox>
+          </paper-dropdown-menu>
+        </div>
+
+        <paper-button class="mainBtn" raised id="submitButton" on-tap="submit">提出</paper-button>
+
+      </iron-collapse>
+
 
     </div>
   </template>
@@ -41,7 +177,108 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   <script>
     class MyHearing extends Polymer.Element {
       static get is() { return 'my-hearing'; }
-  
+
+      placeRed(e){
+        this.$.redDot.style.opacity = 0.7
+        const offsetX = this.$.inspectImg.getBoundingClientRect().left
+        const offsetY = this.$.inspectImg.getBoundingClientRect().top
+        const tapX = e.pageX - offsetX - 10
+        const tapY = e.pageY - offsetY - 10
+        this.$.redDot.style.left = tapX + "px"
+        this.$.redDot.style.top = tapY + "px"
+      }
+
+      static get properties() {
+        return {
+          //hospital key in this case
+          params: String,
+          user: Object
+        }
+      }
+
+      additionalCheck(){
+        const selected = this.$.foundOutHow.value
+        if(selected == "紹介"){
+          this.$.additionalFoundOutHow.hidden = false
+          this.$.additionalFoundOutHow.label = "知人・家族、その方のお名前"
+        }else if(selected == "当院ホームページ"){
+          this.$.additionalFoundOutHow.hidden = false
+          this.$.additionalFoundOutHow.label = "どういう語句で検索して見つけましたか？"
+        }else{
+          this.$.additionalFoundOutHow.hidden = true
+        }
+      }
+
+      findRedDotCenter(){
+        var left = parseInt(this.$.redDot.style.left) + 10
+        var top = parseInt(this.$.redDot.style.top) + 10
+        if(!left || !top){
+          return
+        }
+        const imgWidth = this.$.inspectImg.offsetWidth
+        const imgHeight = this.$.inspectImg.offsetHeight
+        left = left / imgWidth * 100
+        top = top / imgHeight * 100
+        const center = {
+          top: top,
+          left: left
+        }
+        return center
+      }
+
+      submit(){
+        if(!this.params){
+          return
+        }
+        if(!this.user){
+          return
+        }
+        const redDotCenter = this.findRedDotCenter()
+        const afterHealthyBody = this.$.afterHealthyBody.value
+        const howLong = this.$.howLong.value
+        const happenedWhere = this.$.happenedWhere.value
+        const fromWhat = this.$.fromWhat.value
+        const anyDisease = this.$.anyDisease.value
+        const fastOrSlow = this.$.fastOrSlow.value
+        const foundOutHow = this.$.foundOutHow.value
+        var additionalFoundOutHow = this.$.additionalFoundOutHow.value
+        if(!additionalFoundOutHow) additionalFoundOutHow = null
+        const possiblyPregnant = this.$.possiblyPregnant.value
+        const introduceProfessional = this.$.introduceProfessional.value
+        const time = new Date().getTime()
+        const inputs = {
+          patientId: this.user.uid,
+          hospitalId: this.params,
+          redDotCenter: redDotCenter,
+          afterHealthyBody: afterHealthyBody,
+          howLong: howLong,
+          happenedWhere: happenedWhere,
+          fromWhat: fromWhat,
+          anyDisease: anyDisease,
+          fastOrSlow: fastOrSlow,
+          foundOutHow: foundOutHow,
+          additionalFoundOutHow: additionalFoundOutHow,
+          possiblyPregnant: possiblyPregnant,
+          introduceProfessional: introduceProfessional,
+          time: time
+        }
+        //input it into the hospitals database
+        const newHospitalRef = window.firebase.database().ref().child("users/" + this.params + "/hearings/").push()
+        newHospitalRef.set(inputs)
+
+        // input it into the patients database
+        const newPatientRef = window.firebase.database().ref().child("users/" + this.user.uid + "/hearings/").push()
+        newPatientRef.set(inputs)
+
+
+        //input the patient into hospital's patient list
+        window.firebase.database().child("users/" + this.params + "/patients/" + this.user.uid).set(time)
+
+        //input the hospital into patient's hospital list
+        window.firebase.database().child("users/" + this.user.uid + "hospitals/" + this.params).set(time)
+        this.$.form.hide()
+        this.$.afterMessage.show()
+      }
 
     }
 

@@ -11,31 +11,41 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
 <link rel="import" href="shared-styles.html">
 
-<dom-module id="my-patient-hospitals">
+<dom-module id="my-qr">
   <template>
     <style include="shared-styles">
       :host {
         display: block;
       }
+
+      .card>img{
+        display:block;
+        margin:10px auto;
+      }
     </style>
 
+
     <div class="card">
+
+      <img src="http://chart.apis.google.com/chart?cht=qr&chs=240x240&chl=https://cloudpatientinfo.firebaseapp.com/hearing/[[params]]&chld=L|0" />
 
     </div>
   </template>
 
   <script>
-    class MyPatientHospitals extends Polymer.Element {
-      static get is() { return 'my-patient-hospitals'; }
+    class MyQr extends Polymer.Element {
+      static get is() { return 'my-qr'; }
 
       static get properties() {
         return {
           //hospital key in this case
-          params: String,
-          user: Object
+          params: String
         }
+      }
+
+
     }
 
-    window.customElements.define(MyPatientHospitals.is, MyPatientHospitals);
+    window.customElements.define(MyQr.is, MyQr);
   </script>
 </dom-module>

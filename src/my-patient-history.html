@@ -27,6 +27,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   <script>
     class MyPatientHistory extends Polymer.Element {
       static get is() { return 'my-patient-history'; }
+
+      static get properties() {
+        return {
+          //hospital key in this case
+          params: String,
+          user: Object
+        }
     }
 
     window.customElements.define(MyPatientHistory.is, MyPatientHistory);
