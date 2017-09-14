@@ -57,6 +57,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       #closeButton{
         margin-bottom:20px;
       }
+
+      .nameDateWrapper{
+        width:100%;
+        display:flex;
+        justify-content: space-between;
+      }
     </style>
 
     <firebase-auth
@@ -75,7 +81,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       data="{{userType}}">
     </firebase-document>
 
-    <paper-button class="leftButton wideButton" on-tap="openWrapper">[[displayName]]</paper-button>
+    <paper-button class="leftButton wideButton" on-tap="openWrapper"><div class="nameDateWrapper"><div>[[displayName]]</div><div>[[displayDate]]</div></div></paper-button>
 
     <iron-collapse id="wrapper" class="wrapper">
 
@@ -152,12 +158,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             type: Object,
             observer: 'changeDisplayName'
           },
-          displayName: Object
+          displayName: Object,
+          displayDate: String,
         }
       }
 
       changeDisplayName(){
-        console.log("display name change", this.hearingData)
+        // console.log("display name change", this.hearingData)
         if(this.userType == "patient"){
           this.displayName = this.hearingData.hospitalName
         }else{
@@ -175,6 +182,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         //call change display name when hearing Data changed
         this.changeDisplayName()
+        this.convertToDate()
 
         const left = this.hearingData.redDotCenter.left
         const top = this.hearingData.redDotCenter.top
@@ -185,6 +193,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       openWrapper(){
         this.$.wrapper.toggle()
+      }
+
+      convertToDate(){
+        // console.log("convertotodate")
+        if(!this.hearingData) return
+        // console.log(this.hearingData)
+        if(!this.hearingData.time) return
+        const d = new Date(this.hearingData.time)
+        this.displayDate =  d.getFullYear() +"/" + (d.getMonth()+1) + "/" + d.getDate() + " " + d.getHours() + ":" + d.getMinutes()
       }
 
     }

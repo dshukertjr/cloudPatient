@@ -12,6 +12,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-query.html">
 <link rel="import" href="my-hospital-hearing.html">
+<link rel="import" href="my-icons.html">
 <link rel="import" href="shared-styles.html">
 
 <dom-module id="my-hospital-hearings">
@@ -67,7 +68,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
  -->
     <div class="card">
 
-      <template is="dom-repeat" items="[[hearings]]" as="hearing">
+      <paper-icon-button on-tap="loadHearings" icon="my-icons:cached"></paper-icon-button>
+
+
+      <template is="dom-repeat" items="[[hearings]]" as="hearing" sort="_computeSort">
         <my-hospital-hearing params="[[hearing.key]]"></my-hospital-hearing>
       </template>
 
@@ -108,7 +112,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       loadHearings(){
         // this.hearings=[]
         var htemp = this.hearings
-        this.hearings = []
+        htemp = []
+        // this.hearings = []
         // this.hearings.push({key: "some"})
         // console.log(this.hearings)
         // return
@@ -117,24 +122,30 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         if(!this.user){
           return
         }
-        const ref = window.firebase.database().ref().child("users/" + this.user.uid + "/hearings")
+        var count = 0
+        const ref = window.firebase.database().ref().child("users/" + this.user.uid + "/hearings").limitToLast(30)
         ref.once('value', function(snapshot) {
           snapshot.forEach(function(childSnapshot) {
             var childKey = childSnapshot.key
+
+            if(count == 0) that.newestQuestionKey = childKey
+
             // var childData = childSnapshot.val()
             // childKey = "some some"
-            console.log("childKey", childKey)
+            // console.log("childKey", childKey)
             const newkey = {key: childKey}
 
             // var temp = that.hearings
             // temp.push(key)
-            console.log("htempt pre", htemp)
+            // console.log("htempt pre", htemp)
             htemp.push(newkey)
-            console.log("htemp", htemp)
+            // console.log("htemp", htemp)
             // console.log("temp", temp)
             // temp = [{key: "some"}]
             that.hearings = htemp
-            console.log("final", that.hearings)
+            // console.log("final", that.hearings)
+
+            count++
 
           })
         })
@@ -148,22 +159,26 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       listenForNewHearings(){
+        if(!this.newestQuestionKey){
+          return
+        }
         const that = this
         const firebase = window.firebase
+        console.log("newestQuestionKey", this.newestQuestionKey)
         this.listenQuery = firebase.database().ref("users/" + this.user.uid + "/hearings").startAt(null, this.newestQuestionKey)
         this.listenQuery.on('value', function(snapshot) {
           const snap = snapshot.val()
-          cnosole.log("listenForNewHearings", snap)
+          console.log("listenForNewHearings", snap)
         })
       }
 
-      // _computeSort(a, b) {
-      //   // http://stackoverflow.com/questions/33953938/polymer-1-0-sorting-dom-repeat
-      //   if (a.$key == b.$key) {
-      //     return 0;
-      //   }
-      //   return a.$key > b.$key ? -1 : 1;
-      // }
+      _computeSort(a, b) {
+        // http://stackoverflow.com/questions/33953938/polymer-1-0-sorting-dom-repeat
+        if (a.key == b.key) {
+          return 0;
+        }
+        return a.key > b.key ? -1 : 1;
+      }
 
     }
 
