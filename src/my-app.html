@@ -102,7 +102,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <app-header slot="header" condenses reveals effects="waterfall">
           <app-toolbar>
             <paper-icon-button icon="my-icons:menu" drawer-toggle></paper-icon-button>
-            <div main-title>クラウド問診票</div>
+            <div main-title>クラウド予診票</div>
           </app-toolbar>
         </app-header>
 
@@ -113,6 +113,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             role="main">
           <my-login name="login"></my-login>
           <my-hearing name="hearing" params="[[params]]"></my-hearing>
+          <my-hospital-hearing name="hospital-hearing" params="[[params]]"></my-hospital-hearing>
+          <my-hospital-hearings name="hospital-hearings"></my-hospital-hearings>
           <my-qr name="qr" params="[[params]]"></my-qr>
           <my-view404 name="view404"></my-view404>
         </iron-pages>

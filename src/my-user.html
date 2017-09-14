@@ -13,7 +13,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/polymerfire/firebase-document.html">
 <link rel="import" href="shared-styles.html">
 
-<dom-module id="my-hospital-hearing">
+<dom-module id="my-user">
   <template>
     <style include="shared-styles">
       :host {
@@ -60,7 +60,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     <firebase-document
       path="users/[[user.uid]]/hearings/[[params]]"
-      data="{{hearingData}}">
+      data="{{userData}}">
     </firebase-document>
 
     <div class="card">
@@ -120,18 +120,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   </template>
 
   <script>
-    class MyHospitalHearing extends Polymer.Element {
-      static get is() { return 'my-hospital-hearing'; }
+    class MyUser extends Polymer.Element {
+      static get is() { return 'my-user'; }
 
       static get properties() {
         return {
           //hospital key in this case
           params: String,
           user: Object,
-          hearingData: {
-            type: Object,
-            observer: 'placeRedDot'
-          },
+          userData: Object
         }
       }
 
@@ -148,6 +145,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     }
 
-    window.customElements.define(MyHospitalHearing.is, MyHospitalHearing);
+    window.customElements.define(MyUser.is, MyUser);
   </script>
 </dom-module>

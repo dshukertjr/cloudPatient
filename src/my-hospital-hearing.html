@@ -9,6 +9,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 -->
 
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/iron-collapse/iron-collapse.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-document.html">
 <link rel="import" href="shared-styles.html">
@@ -18,6 +20,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <style include="shared-styles">
       :host {
         display: block;
+        border-bottom:1px solid #aaa;
       }
 
       #inspectImg{
@@ -39,7 +42,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         opacity:0;
       }
 
-      .card>div{
+      .wrapper>div{
         margin: 30px 0;
       }
 
@@ -49,6 +52,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       .answer{
         font-weight:700;
+      }
+
+      #closeButton{
+        margin-bottom:20px;
       }
     </style>
 
@@ -63,7 +70,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       data="{{hearingData}}">
     </firebase-document>
 
-    <div class="card">
+    <firebase-document
+      path="users/[[user.uid]]/type"
+      data="{{userType}}">
+    </firebase-document>
+
+    <paper-button class="leftButton wideButton" on-tap="openWrapper">[[displayName]]</paper-button>
+
+    <iron-collapse id="wrapper" class="wrapper">
 
       <div id="inspectImgWrapper">
         <div id="redDot"></div>
@@ -116,7 +130,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <p class="answer">[[hearingData.introduceProfessional]]</p>
       </div>
 
-    </div>
+      <paper-button class="wideButton" id="closeButton" raised on-tap="openWrapper">閉じる</paper-button>
+
+    </iron-collapse>
   </template>
 
   <script>
@@ -132,6 +148,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             type: Object,
             observer: 'placeRedDot'
           },
+          userType: {
+            type: Object,
+            observer: 'changeDisplayName'
+          },
+          displayName: Object
+        }
+      }
+
+      changeDisplayName(){
+        console.log("display name change", this.hearingData)
+        if(this.userType == "patient"){
+          this.displayName = this.hearingData.hospitalName
+        }else{
+          this.displayName = this.hearingData.patientName
         }
       }
 
@@ -139,11 +169,22 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         if(!this.hearingData){
           return
         }
+        if(!this.hearingData.redDotCenter){
+          return
+        }
+
+        //call change display name when hearing Data changed
+        this.changeDisplayName()
+
         const left = this.hearingData.redDotCenter.left
         const top = this.hearingData.redDotCenter.top
         this.$.redDot.style.opacity = 0.7
         this.$.redDot.style.left = "calc(" + left + "% - 10px)"
         this.$.redDot.style.top = "calc(" + top + "% - 10px)"
+      }
+
+      openWrapper(){
+        this.$.wrapper.toggle()
       }
 
     }

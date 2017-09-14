@@ -15,8 +15,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/iron-collapse/iron-collapse.html">
 <link rel="import" href="../bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
 <link rel="import" href="../bower_components/paper-item/paper-item.html">
-<link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
 <link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-document.html">
 <link rel="import" href="shared-styles.html">
 
 <dom-module id="my-hearing">
@@ -64,6 +65,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     on-error="handleError">
     </firebase-auth>
 
+    <firebase-document
+      path="users/[[params]]/profile"
+      data="{{hospitalData}}">
+    </firebase-document>
+
+    <firebase-document
+      path="users/[[user.uid]]/profile"
+      data="{{patientData}}">
+    </firebase-document>
+
     <div class="card">
 
       <iron-collapse id="afterMessage">
@@ -110,11 +121,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         <div>
           <p>何をしてて痛くなりましたか？</p>
-          <paper-textareav required auto-validate id="fromWhat"></paper-textarea>
+          <paper-textarea label="ここに入力" required auto-validate id="fromWhat"></paper-textarea>
         </div>
         <div>
           <p>今までかかった病気（手術など）はございますか？</p>
-          <paper-textareav required auto-validate id="anyDisease"></paper-textarea>
+          <paper-textarea label="ここに入力" required auto-validate id="anyDisease"></paper-textarea>
         </div>
 
         <div>
@@ -158,7 +169,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         </div>
 
         <div>
-          <paper-dropdown-menu  required id="introduceProfessional" label="症状によっては、総合病院・専門病院への紹介を希望されますか？">
+          <p>症状によっては、総合病院・専門病院への紹介を希望されますか？</p>
+          <paper-dropdown-menu  required id="introduceProfessional" label="選択肢より選んでください。">
             <paper-listbox slot="dropdown-content">
               <paper-item>希望する</paper-item>
               <paper-item>希望しない</paper-item>
@@ -192,7 +204,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         return {
           //hospital key in this case
           params: String,
-          user: Object
+          user: Object,
+          patientData: Object,
+          hospitalData: Object,
         }
       }
 
@@ -228,9 +242,21 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       submit(){
         if(!this.params){
+          console.log(1)
           return
         }
         if(!this.user){
+          console.log(2)
+          return
+        }
+        if(!this.patientData || !this.hospitalData){
+          console.log(3)
+          return
+        }
+        const patientName = this.patientData.patientName
+        const hospitalName = this.hospitalData.hospitalName
+        if(!patientName || !hospitalName){
+          console.log(4)
           return
         }
         const redDotCenter = this.findRedDotCenter()
@@ -243,12 +269,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         const foundOutHow = this.$.foundOutHow.value
         var additionalFoundOutHow = this.$.additionalFoundOutHow.value
         if(!additionalFoundOutHow) additionalFoundOutHow = null
-        const possiblyPregnant = this.$.possiblyPregnant.value
+        var possiblyPregnant = this.$.possiblyPregnant.value
+        if(!possiblyPregnant) possiblyPregnant = null
         const introduceProfessional = this.$.introduceProfessional.value
         const time = new Date().getTime()
         const inputs = {
           patientId: this.user.uid,
           hospitalId: this.params,
+          patientName: patientName,
+          hospitalName: hospitalName,
           redDotCenter: redDotCenter,
           afterHealthyBody: afterHealthyBody,
           howLong: howLong,
@@ -272,10 +301,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 
         //input the patient into hospital's patient list
-        window.firebase.database().child("users/" + this.params + "/patients/" + this.user.uid).set(time)
+        window.firebase.database().ref().child("users/" + this.params + "/patients/" + this.user.uid).set(time)
 
         //input the hospital into patient's hospital list
-        window.firebase.database().child("users/" + this.user.uid + "hospitals/" + this.params).set(time)
+        window.firebase.database().ref().child("users/" + this.user.uid + "/hospitals/" + this.params).set(time)
         this.$.form.hide()
         this.$.afterMessage.show()
       }

@@ -10,7 +10,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
-<link rel="import" href="../bower_components/polymerfire/firebase-document.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-query.html">
+<link rel="import" href="my-hospital-hearing.html">
 <link rel="import" href="shared-styles.html">
 
 <dom-module id="my-hospital-hearings">
@@ -38,6 +39,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         box-shadow: 0 0 5px red;
         opacity:0;
       }
+
+      .card>div{
+        margin: 30px 0;
+      }
+
+      .question{
+        font-weight:200;
+      }
+
+      .answer{
+        font-weight:700;
+      }
     </style>
 
     <firebase-auth
@@ -46,63 +59,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     on-error="handleError">
     </firebase-auth>
 
-    <firebase-document
-      path="users/[[user.uid]]/hearings/[[params]]"
-      data="{{hearingData}}">
-    </firebase-document>
-
+<!--     <firebase-query
+        id="query"
+        path="users/[[user.uid]]/hearings"
+        data="{{hearings}}">
+    </firebase-query>
+ -->
     <div class="card">
 
-      <div id="inspectImgWrapper">
-        <div id="redDot"></div>
-        <img id="inspectImg" src="../images/assets/inspect.png">
-      </div>
-
-      <div>
-        <p class="question">治療によって快適な身体を手に入れた後の目標、目的を教えてください。</p>
-        <p class="answer">[[hearingData.afterHealthyBody]]</p>
-      </div>
-
-      <div>
-        <p class="question">どのくらい前から痛みますか？</p>
-        <p class="answer">[[hearingData.howLong]]</p>
-      </div>
-
-      <div>
-        <p class="question">どこでそのようになりましたか？</p>
-        <p class="answer">[[hearingData.happenedWhere]]</p>
-      </div>
-
-      <div>
-        <p class="question">何をしてて痛くなりましたか？</p>
-        <p class="answer">[[hearingData.fromWhat]]</p>
-      </div>
-
-      <div>
-        <p class="question">今までかかった病気（手術など）はございますか？</p>
-        <p class="answer">[[hearingData.anyDisease]]</p>
-      </div>
-
-      <div>
-        <p class="question">当院では通院時間の取れない方、痛みが取れず困っている方、より早く痛みから逃れたい方のために、ご相談後、特別治療を導入しております。<br />通常の保険治療に比べて早く治すことが可能です。ご希望の方を選択してください。</p>
-        <p class="answer">[[hearingData.fastOrSlow]]</p>
-      </div>
-
-      <div>
-        <p class="question">どちらで当院をお知りになりましたか？</p>
-        <p class="answer">[[hearingData.foundOutHow]]</p>
-        <p class="answer" hidden="![[hearingData.additionalFoundOutHow]]">[[hearingData.additionalFoundOutHow]]</p>
-      </div>
-
-      <div>
-        <p class="question">※女性の方のみにお聞きします。今、妊娠またはその可能性はありますか？</p>
-        <p class="answer">[[hearingData.possiblyPregnant]]</p>
-      </div>
-
-      <div>
-        <p class="question">症状によっては、総合病院・専門病院への紹介を希望されますか？</p>
-        <p class="answer">[[hearingData.introduceProfessional]]</p>
-      </div>
+      <template is="dom-repeat" items="[[hearings]]" as="hearing">
+        <my-hospital-hearing params="[[hearing.key]]"></my-hospital-hearing>
+      </template>
 
     </div>
   </template>
@@ -115,9 +82,89 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         return {
           //hospital key in this case
           params: String,
-          user: Object,
-          hearingData: Object,
+          user: {
+            type: Object,
+            observer: 'loadHearings'
+          },
+          hearings: {
+            type: Object,
+            observer: 'consoleHearing'
+          },
+          listenQuery: {
+            type: Object,
+            observer: 'listenQueryChanged'
+          },
+          newestQuestionKey: {
+            type: String,
+            observer: 'listenForNewHearings'
+          }
         }
+      }
+
+      consoleHearing(){
+        console.log("console hearings", this.hearings)
+      }
+
+      loadHearings(){
+        // this.hearings=[]
+        var htemp = this.hearings
+        this.hearings = []
+        // this.hearings.push({key: "some"})
+        // console.log(this.hearings)
+        // return
+        console.log("load called")
+        const that = this
+        if(!this.user){
+          return
+        }
+        const ref = window.firebase.database().ref().child("users/" + this.user.uid + "/hearings")
+        ref.once('value', function(snapshot) {
+          snapshot.forEach(function(childSnapshot) {
+            var childKey = childSnapshot.key
+            // var childData = childSnapshot.val()
+            // childKey = "some some"
+            console.log("childKey", childKey)
+            const newkey = {key: childKey}
+
+            // var temp = that.hearings
+            // temp.push(key)
+            console.log("htempt pre", htemp)
+            htemp.push(newkey)
+            console.log("htemp", htemp)
+            // console.log("temp", temp)
+            // temp = [{key: "some"}]
+            that.hearings = htemp
+            console.log("final", that.hearings)
+
+          })
+        })
+      }
+
+      listenQueryChanged(oldQuery, newQuery){
+          if (oldQuery) {
+            oldQuery.off()
+            // oldQuery.off('value', this.__onFirebaseValue, this);
+          }
+      }
+
+      listenForNewHearings(){
+        const that = this
+        const firebase = window.firebase
+        this.listenQuery = firebase.database().ref("users/" + this.user.uid + "/hearings").startAt(null, this.newestQuestionKey)
+        this.listenQuery.on('value', function(snapshot) {
+          const snap = snapshot.val()
+          cnosole.log("listenForNewHearings", snap)
+        })
+      }
+
+      // _computeSort(a, b) {
+      //   // http://stackoverflow.com/questions/33953938/polymer-1-0-sorting-dom-repeat
+      //   if (a.$key == b.$key) {
+      //     return 0;
+      //   }
+      //   return a.$key > b.$key ? -1 : 1;
+      // }
+
     }
 
     window.customElements.define(MyHospitalHearings.is, MyHospitalHearings);
