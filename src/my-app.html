@@ -20,11 +20,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/iron-pages/iron-pages.html">
 <link rel="import" href="../bower_components/iron-selector/iron-selector.html">
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/paper-spinner/paper-spinner-lite.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-app.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-document.html">
 <link rel="import" href="my-icons.html">
 
 <link rel="lazy-import" href="my-login.html">
 <link rel="lazy-import" href="my-hearing.html">
+<link rel="lazy-import" href="my-history.html">
+<link rel="lazy-import" href="my-hospital-hearings.html">
 <link rel="lazy-import" href="my-qr.html">
 <link rel="lazy-import" href="my-view404.html">
 
@@ -67,6 +71,23 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         color: black;
         font-weight: bold;
       }
+
+      #menuIcon {
+        --iron-icon-height: 32px;
+        --iron-icon-width: 32px;
+        margin-right:10px;
+      }
+
+      paper-spinner-lite{
+        --paper-spinner-color:var(--app-primary-color);
+        display:none;
+        margin:0 auto;
+        margin-top: calc(40vh - 40px);
+      }
+
+      paper-spinner-lite[active]{
+        display:block;
+      }
     </style>
 
 
@@ -76,6 +97,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       api-key="AIzaSyBjZeIdP-NpoqHXFW_tOaxAVSmCgbE_rgM"
       messaging-sender-id="259897919510">
     </firebase-app>
+
+    <firebase-document
+      path="users/[[user.uid]]/type"
+      data="{{userType}}">
+    </firebase-document>
 
 
 
@@ -90,14 +116,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <app-drawer-layout fullbleed narrow="{{narrow}}">
       <!-- Drawer content -->
       <app-drawer id="drawer" slot="drawer" swipe-open="[[narrow]]">
-        <app-toolbar>Menu</app-toolbar>
+        <app-toolbar><iron-icon id="menuIcon" src="../images/manifest/icon-96x96.png"></iron-icon>Menu</app-toolbar>
         <iron-selector selected="[[page]]" attr-for-selected="name" class="drawer-list" role="navigation">
-          <a name="login" href="[[rootPath]]login">ログイン</a>
+          <a name="login" href="[[rootPath]]login">マイページ</a>
+          <a name="hospital-hearings" href="[[rootPath]]hospital-hearings">予診票一覧</a>
+          <a name="qr" href="[[rootPath]]qr">QRコード</a>
+          <a name="history" href="[[rootPath]]history">履歴</a>
         </iron-selector>
       </app-drawer>
 
       <!-- Main content -->
-      <app-header-layout has-scrolling-region>
+      <app-header-layout>
 
         <app-header slot="header" condenses reveals effects="waterfall">
           <app-toolbar>
@@ -106,15 +135,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           </app-toolbar>
         </app-header>
 
+        <paper-spinner-lite id="pagePreLoader" alt="Loading contacts list" active></paper-spinner-lite>
+
         <iron-pages
             selected="[[page]]"
             attr-for-selected="name"
             fallback-selection="view404"
+            on-iron-select="ironPageSelect"
+            on-iron-deselect="ironPageDeselect"
             role="main">
-          <my-login name="login"></my-login>
+          <my-login on-iron-select="myLoginSelect" name="login"></my-login>
           <my-hearing name="hearing" params="[[params]]"></my-hearing>
           <my-hospital-hearing name="hospital-hearing" params="[[params]]"></my-hospital-hearing>
           <my-hospital-hearings name="hospital-hearings"></my-hospital-hearings>
+          <my-history name="history"></my-history>
           <my-qr name="qr" params="[[params]]"></my-qr>
           <my-view404 name="view404"></my-view404>
         </iron-pages>
@@ -135,6 +169,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           },
           routeData:Object,
           subroute: String,
+          userType: Object,
           params: {
             type: String,
             computed: 'parseSubroute(subroute)'
@@ -151,14 +186,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         ];
       }
 
+      ironPageSelect(){
+        console.log("iron page select fired")
+        this.$.pagePreLoader.active = false
+      }
+
+      ironPageDeselect(){
+        console.log("iron page deselect fired")
+        this.$.pagePreLoader.active = true
+      }
+
       parseSubroute(){
         if(!this.subroute) return null
         if(!this.subroute.path) return null
         return this.subroute.path.substr(1)
-      }
-
-      consolerootpath(){
-        console.log("rootpath", this.rootPath)
       }
 
       _routePageChanged(page) {

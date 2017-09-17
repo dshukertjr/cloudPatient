@@ -62,6 +62,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         text-align:left;
       }
 
+      paper-spinner-lite{
+        --paper-spinner-color:var(--app-primary-color);
+        display:none;
+        margin:0 auto;
+      }
+
+      paper-spinner-lite[active]{
+        display:block;
+      }
     </style>
   </template>
 </dom-module>

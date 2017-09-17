@@ -1,0 +1,70 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-query.html">
+<link rel="import" href="helpers/user-helper.html">
+<link rel="import" href="shared-styles.html">
+
+<dom-module id="my-history">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+      }
+    </style>
+
+    <firebase-auth
+    id="auth"
+    user="{{user}}"
+    on-error="handleError">
+    </firebase-auth>
+
+    <firebase-query
+      id="query"
+      path="users/[[user.uid]]/users"
+      data="{{users}}">
+    </firebase-query>
+
+
+    <div class="card">
+
+      <template is="dom-repeat" items="[[users]]" sort="_computeSort">
+        <user-helper params="[[item.$key]]"></user-helper>
+      </template>
+
+    </div>
+  </template>
+
+  <script>
+    class MyHistory extends Polymer.Element {
+      static get is() { return 'my-history'; }
+
+      static get properties() {
+        return {
+          user: Object,
+          users: Object
+        }
+      }
+
+      _computeSort(a, b) {
+        // http://stackoverflow.com/questions/33953938/polymer-1-0-sorting-dom-repeat
+        if (a.$key == b.$key) {
+          return 0;
+        }
+        return a.$key > b.$key ? -1 : 1;
+      }
+
+    }
+
+    window.customElements.define(MyHistory.is, MyHistory);
+  </script>
+</dom-module>

@@ -8,12 +8,13 @@ Code distributed by Google as part of the polymer project is also
 subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
 -->
 
-<link rel="import" href="../bower_components/polymer/polymer-element.html">
-<link rel="import" href="../bower_components/iron-collapse/iron-collapse.html">
-<link rel="import" href="../bower_components/paper-button/paper-button.html">
-<link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
-<link rel="import" href="../bower_components/polymerfire/firebase-document.html">
-<link rel="import" href="shared-styles.html">
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../../bower_components/iron-collapse/iron-collapse.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../../bower_components/polymerfire/firebase-auth.html">
+<link rel="import" href="../../bower_components/polymerfire/firebase-document.html">
+<link rel="import" href="../shared-styles.html">
 
 <dom-module id="my-hospital-hearing">
   <template>
@@ -60,6 +61,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       .nameDateWrapper{
         width:100%;
+        display:flex;
+        justify-content: space-between;
+      }
+
+      #pricePatient{
         display:flex;
         justify-content: space-between;
       }
@@ -136,6 +142,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <p class="answer">[[hearingData.introduceProfessional]]</p>
       </div>
 
+
+      <paper-input id="priceHospital" label="お会計" value="{{hearingData.price}}"></paper-input>
+
+      <div id="pricePatient">
+        <div>お会計</div>
+        <div>¥ [[hearingData.price]]</div>
+      </div>
+
+
       <paper-button class="wideButton" id="closeButton" raised on-tap="openWrapper">閉じる</paper-button>
 
     </iron-collapse>
@@ -147,7 +162,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       static get properties() {
         return {
-          //hospital key in this case
+          //hearing key in this case
           params: String,
           user: Object,
           hearingData: {
@@ -163,6 +178,34 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
       }
 
+      static get observers() {
+        return [
+          '_priceChanged(hearingData.price)'
+        ];
+      }
+
+      _priceChanged(){
+        if(this.userType != "hospital"){
+          return
+        }
+        if(!this.hearingData.price){
+          return
+        }
+        window.firebase.database().ref().child("users/" + this.hearingData.patientId + "/hearings/" + this.params + "/price").set(this.hearingData.price)
+      }
+
+      togglePrice(){
+        if(this.userType == "patient"){
+          // this.$.pricePatient.style.display = "flex"
+          this.$.pricePatient.hidden = false
+          this.$.priceHospital.hidden = true
+        }else if(this.userType == "hospital"){
+          // this.$.pricePatient.style.display = "none"
+          this.$.pricePatient.hidden = true
+          this.$.priceHospital.hidden = false
+        }
+      }
+
       changeDisplayName(){
         // console.log("display name change", this.hearingData)
         if(this.userType == "patient"){
@@ -170,6 +213,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }else{
           this.displayName = this.hearingData.patientName
         }
+        this.togglePrice()
       }
 
       placeRedDot(){

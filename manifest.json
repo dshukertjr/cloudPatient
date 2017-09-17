@@ -3,7 +3,7 @@
   "short_name": "予診票",
   "start_url": "./",
   "display": "standalone",
-  "theme_color": "#03A9F4",
+  "theme_color": "#82b1ff",
   "background_color": "#fff",
   "gcm_sender_id": "103953800507",
   "icons": [

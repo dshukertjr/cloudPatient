@@ -1,17 +1,11 @@
-<!--
-@license
-Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
-This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
-The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
-The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
-Code distributed by Google as part of the polymer project is also
-subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
--->
+
+<!-- list of hearings of the user -->
 
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/iron-collapse/iron-collapse.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-query.html">
-<link rel="import" href="my-hospital-hearing.html">
+<link rel="import" href="helpers/my-hospital-hearing.html">
 <link rel="import" href="my-icons.html">
 <link rel="import" href="shared-styles.html">
 
@@ -68,7 +62,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
  -->
     <div class="card">
 
-      <paper-icon-button on-tap="loadHearings" icon="my-icons:cached"></paper-icon-button>
+      <iron-collapse id="reloadButtonWrapper">
+        <paper-icon-button id="reloadButton" on-tap="loadHearings" icon="my-icons:cached"></paper-icon-button>
+      </iron-collapse>
 
 
       <template is="dom-repeat" items="[[hearings]]" as="hearing" sort="_computeSort">
@@ -90,14 +86,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             type: Object,
             observer: 'loadHearings'
           },
-          hearings: {
-            type: Object,
-            observer: 'consoleHearing'
-          },
-          listenQuery: {
-            type: Object,
-            observer: 'listenQueryChanged'
-          },
+          hearings: Object,
           newestQuestionKey: {
             type: String,
             observer: 'listenForNewHearings'
@@ -105,15 +94,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
       }
 
-      consoleHearing(){
-        console.log("console hearings", this.hearings)
-      }
-
       loadHearings(){
         // this.hearings=[]
         var htemp = this.hearings
         htemp = []
-        // this.hearings = []
+        this.hearings = []
         // this.hearings.push({key: "some"})
         // console.log(this.hearings)
         // return
@@ -122,13 +107,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         if(!this.user){
           return
         }
-        var count = 0
         const ref = window.firebase.database().ref().child("users/" + this.user.uid + "/hearings").limitToLast(30)
         ref.once('value', function(snapshot) {
           snapshot.forEach(function(childSnapshot) {
             var childKey = childSnapshot.key
 
-            if(count == 0) that.newestQuestionKey = childKey
+            that.newestQuestionKey = childKey
 
             // var childData = childSnapshot.val()
             // childKey = "some some"
@@ -145,17 +129,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             that.hearings = htemp
             // console.log("final", that.hearings)
 
-            count++
-
           })
         })
-      }
-
-      listenQueryChanged(oldQuery, newQuery){
-          if (oldQuery) {
-            oldQuery.off()
-            // oldQuery.off('value', this.__onFirebaseValue, this);
-          }
       }
 
       listenForNewHearings(){
@@ -165,8 +140,23 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         const that = this
         const firebase = window.firebase
         console.log("newestQuestionKey", this.newestQuestionKey)
-        this.listenQuery = firebase.database().ref("users/" + this.user.uid + "/hearings").startAt(null, this.newestQuestionKey)
-        this.listenQuery.on('value', function(snapshot) {
+        window.firebase.database().ref("users/" + this.user.uid + "/hearings").off()
+        const listenQuery = firebase.database().ref("users/" + this.user.uid + "/hearings").startAt(null, this.newestQuestionKey)
+        listenQuery.on('value', function(snapshot) {
+          var count = 0
+          snapshot.forEach(function(childSnapshot) {
+            count++
+          })
+
+          console.log("count", count)
+          if(count > 1){
+            console.log("open")
+            that.$.reloadButtonWrapper.show()
+          }else{
+            console.log("close")
+            that.$.reloadButtonWrapper.hide()
+          }
+
           const snap = snapshot.val()
           console.log("listenForNewHearings", snap)
         })

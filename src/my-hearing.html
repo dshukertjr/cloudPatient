@@ -242,21 +242,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       submit(){
         if(!this.params){
-          console.log(1)
           return
         }
         if(!this.user){
-          console.log(2)
           return
         }
         if(!this.patientData || !this.hospitalData){
-          console.log(3)
           return
         }
         const patientName = this.patientData.patientName
         const hospitalName = this.hospitalData.hospitalName
         if(!patientName || !hospitalName){
-          console.log(4)
           return
         }
         const redDotCenter = this.findRedDotCenter()
@@ -273,6 +269,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         if(!possiblyPregnant) possiblyPregnant = null
         const introduceProfessional = this.$.introduceProfessional.value
         const time = new Date().getTime()
+
+
+        //input it into the hospitals database
+        const newHospitalRef = window.firebase.database().ref().child("users/" + this.params + "/hearings/").push()
+
+        // input it into the patients database
+        const newPatientRef = window.firebase.database().ref().child("users/" + this.user.uid + "/hearings/" + newHospitalRef.key)
+
         const inputs = {
           patientId: this.user.uid,
           hospitalId: this.params,
@@ -291,20 +295,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           introduceProfessional: introduceProfessional,
           time: time
         }
-        //input it into the hospitals database
-        const newHospitalRef = window.firebase.database().ref().child("users/" + this.params + "/hearings/").push()
-        newHospitalRef.set(inputs)
 
-        // input it into the patients database
-        const newPatientRef = window.firebase.database().ref().child("users/" + this.user.uid + "/hearings/").push()
+        newHospitalRef.set(inputs)
         newPatientRef.set(inputs)
 
 
+
         //input the patient into hospital's patient list
-        window.firebase.database().ref().child("users/" + this.params + "/patients/" + this.user.uid).set(time)
+        window.firebase.database().ref().child("users/" + this.params + "/users/" + this.user.uid).set(time)
 
         //input the hospital into patient's hospital list
-        window.firebase.database().ref().child("users/" + this.user.uid + "/hospitals/" + this.params).set(time)
+        window.firebase.database().ref().child("users/" + this.user.uid + "/users/" + this.params).set(time)
         this.$.form.hide()
         this.$.afterMessage.show()
       }

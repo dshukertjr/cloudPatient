@@ -1,0 +1,187 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../../bower_components/iron-collapse/iron-collapse.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/polymerfire/firebase-auth.html">
+<link rel="import" href="../../bower_components/polymerfire/firebase-document.html">
+<link rel="import" href="../shared-styles.html">
+
+<dom-module id="user-helper">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+      }
+
+      .nameWrapper{
+        text-align:left;
+        width:100%;
+      }
+
+      .label{
+        font-size:11px;
+        font-weight:200;
+      }
+
+      .categoryWrapper{
+        margin:8px 0;
+      }
+    </style>
+
+    <firebase-auth
+    id="auth"
+    user="{{user}}"
+    on-error="handleError">
+    </firebase-auth>
+
+    <firebase-document
+      path="users/[[params]]/type"
+      data="{{userType}}">
+    </firebase-document>
+
+    <firebase-document
+      path="users/[[params]]/profile"
+      data="{{userData}}">
+    </firebase-document>
+
+    <paper-button class="leftButton wideButton" on-tap="openWrapper"><div class="nameWrapper">[[displayName]]</div></paper-button>
+
+    <iron-collapse id="userInfoWrapper">
+
+      <div class="categoryWrapper patient">
+        <div class="label">ふりがな</div>
+        <div calss="property">[[userData.patientHurigana]]</div>
+      </div>
+      
+      <div class="categoryWrapper patient">
+        <div class="label">生年月日</div>
+        <div calss="property">[[userData.patientBirthday]]</div>
+      </div>
+      
+      <div class="categoryWrapper patient">
+        <div class="label">職業</div>
+        <div calss="property">[[userData.patientJob]]</div>
+      </div>
+      
+      <div class="categoryWrapper patient">
+        <div class="label">現住所</div>
+        <div calss="property">[[userData.patientAddress]]</div>
+      </div>
+      
+      <div class="categoryWrapper patient">
+        <div class="label">電話番号</div>
+        <div calss="property">[[userData.patientPhoneNumber]]</div>
+      </div>
+      
+      <div class="categoryWrapper patient">
+        <div class="label">Email</div>
+        <div calss="property">[[userData.patientEmail]]</div>
+      </div>
+      
+      <div class="categoryWrapper patient">
+        <div class="label">スポーツ歴</div>
+        <div calss="property">[[userData.patientSportsHistory]]</div>
+      </div>
+      
+      <div class="categoryWrapper hospital">
+        <div class="label">Email</div>
+        <div calss="property">[[userData.hospitalEmail]]</div>
+      </div>
+      
+      <div class="categoryWrapper hospital">
+        <div class="label">電話番号</div>
+        <div calss="property">[[userData.hospitalPhoneNumber]]</div>
+      </div>
+      
+      <div class="categoryWrapper hospital">
+        <div class="label">住所</div>
+        <div calss="property">[[userData.hospitalAddress]]</div>
+      </div>
+
+      <paper-button raised on-tap="openWrapper" class="wideButton">閉じる</paper-button>
+      
+    </iron-collapse>
+
+
+
+
+  </template>
+
+  <script>
+    class UserHelper extends Polymer.Element {
+      static get is() { return 'user-helper'; }
+
+      static get properties() {
+        return {
+          //user's uid in this case
+          params: String,
+          user: Object,
+          userType: {
+            type: Object,
+            observer: 'userTypeChanged'
+          },
+          userData: Object,
+          displayName: {
+            type: String,
+            computed: 'changeDisplayName(userData, userType)'
+          },
+        }
+      }
+
+      changeDisplayName(){
+        if(!this.userData){
+          return
+        }
+        if(this.userType == "patient"){
+          return this.userData.patientName
+        }else if(this.userType == "hospital"){
+          return this.userData.hospitalName
+        }
+      }
+
+      userTypeChanged(){
+        if(this.userType == "patient"){
+
+          const patients = this.$.userInfoWrapper.querySelectorAll(".categoryWrapper.patient")
+          for(var i = 0; i < patients.length; i++){
+            patients[i].hidden = false
+          }
+
+          const hospitals = this.$.userInfoWrapper.querySelectorAll(".categoryWrapper.hospital")
+          for(var i = 0; i < hospitals.length; i++){
+            hospitals[i].hidden = true
+          }
+
+        }else if(this.userType == "hospital"){
+
+          const patients = this.$.userInfoWrapper.querySelectorAll(".categoryWrapper.patient")
+          for(var i = 0; i < patients.length; i++){
+            patients[i].hidden = true
+          }
+
+          const hospitals = this.$.userInfoWrapper.querySelectorAll(".categoryWrapper.hospital")
+          for(var i = 0; i < hospitals.length; i++){
+            hospitals[i].hidden = false
+          }
+
+        }
+      }
+
+      openWrapper(){
+        this.$.userInfoWrapper.toggle()
+      }
+
+    }
+
+    window.customElements.define(UserHelper.is, UserHelper);
+  </script>
+</dom-module>
