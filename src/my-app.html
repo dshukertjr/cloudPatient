@@ -20,8 +20,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/iron-pages/iron-pages.html">
 <link rel="import" href="../bower_components/iron-selector/iron-selector.html">
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
-<link rel="import" href="../bower_components/paper-spinner/paper-spinner-lite.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-app.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-document.html">
 <link rel="import" href="my-icons.html">
 
@@ -30,6 +30,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="lazy-import" href="my-history.html">
 <link rel="lazy-import" href="my-hospital-hearings.html">
 <link rel="lazy-import" href="my-qr.html">
+<link rel="lazy-import" href="my-receipt.html">
 <link rel="lazy-import" href="my-view404.html">
 
 <dom-module id="my-app">
@@ -88,6 +89,24 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       paper-spinner-lite[active]{
         display:block;
       }
+
+      iron-pages{
+        max-width:700px;
+        margin-left:auto;
+        margin-right:auto;
+        z-index:10001;
+      }
+
+      *[hidden]{
+        display:none !important;
+      }
+
+  
+      @media screen and (min-width:641px){
+        app-drawer{
+          z-index:0;
+        }
+      }
     </style>
 
 
@@ -97,6 +116,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       api-key="AIzaSyBjZeIdP-NpoqHXFW_tOaxAVSmCgbE_rgM"
       messaging-sender-id="259897919510">
     </firebase-app>
+
+    <firebase-auth
+    id="auth"
+    user="{{user}}"
+    on-error="handleError">
+    </firebase-auth>
 
     <firebase-document
       path="users/[[user.uid]]/type"
@@ -119,9 +144,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <app-toolbar><iron-icon id="menuIcon" src="../images/manifest/icon-96x96.png"></iron-icon>Menu</app-toolbar>
         <iron-selector selected="[[page]]" attr-for-selected="name" class="drawer-list" role="navigation">
           <a name="login" href="[[rootPath]]login">マイページ</a>
-          <a name="hospital-hearings" href="[[rootPath]]hospital-hearings">予診票一覧</a>
-          <a name="qr" href="[[rootPath]]qr">QRコード</a>
-          <a name="history" href="[[rootPath]]history">履歴</a>
+          <a id="hearingLink" name="hospital-hearings" href="[[rootPath]]hospital-hearings">[[hearingLabel]]</a>
+          <a id="historyLink" name="history" href="[[rootPath]]history">[[historyLabel]]</a>
+          <a id="qrLink" name="qr" href="[[rootPath]]qr">QRコード</a>
         </iron-selector>
       </app-drawer>
 
@@ -135,14 +160,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           </app-toolbar>
         </app-header>
 
-        <paper-spinner-lite id="pagePreLoader" alt="Loading contacts list" active></paper-spinner-lite>
-
         <iron-pages
             selected="[[page]]"
             attr-for-selected="name"
             fallback-selection="view404"
-            on-iron-select="ironPageSelect"
-            on-iron-deselect="ironPageDeselect"
             role="main">
           <my-login on-iron-select="myLoginSelect" name="login"></my-login>
           <my-hearing name="hearing" params="[[params]]"></my-hearing>
@@ -150,6 +171,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           <my-hospital-hearings name="hospital-hearings"></my-hospital-hearings>
           <my-history name="history"></my-history>
           <my-qr name="qr" params="[[params]]"></my-qr>
+          <my-receipt name="receipt" params="[[params]]"></my-receipt>
           <my-view404 name="view404"></my-view404>
         </iron-pages>
       </app-header-layout>
@@ -169,7 +191,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           },
           routeData:Object,
           subroute: String,
-          userType: Object,
+          user: Object,
+          userType: {
+            type: Object,
+            observer: 'userTypeChanged'
+          },
+          historyLabel: String,
+          hearingLabel: String,
           params: {
             type: String,
             computed: 'parseSubroute(subroute)'
@@ -186,14 +214,26 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         ];
       }
 
-      ironPageSelect(){
-        console.log("iron page select fired")
-        this.$.pagePreLoader.active = false
-      }
-
-      ironPageDeselect(){
-        console.log("iron page deselect fired")
-        this.$.pagePreLoader.active = true
+      userTypeChanged(){
+        console.log("user type changed", this.userType)
+        if(this.userType == "patient"){
+          this.$.hearingLink.hidden = false
+          this.$.historyLink.hidden = false
+          this.$.qrLink.hidden = true
+          this.historyLabel = "病院一覧"
+          this.hearingLabel = "通院履歴"
+        }else if(this.userType == "hospital"){
+          this.$.hearingLink.hidden = false
+          this.$.historyLink.hidden = false
+          this.$.qrLink.hidden = false
+          this.historyLabel = "患者一覧"
+          this.hearingLabel = "予診票"
+        }else{
+          // not logged in
+          this.$.hearingLink.hidden = true
+          this.$.historyLink.hidden = true
+          this.$.qrLink.hidden = true
+        }
       }
 
       parseSubroute(){

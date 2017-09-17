@@ -14,6 +14,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../../bower_components/polymerfire/firebase-auth.html">
 <link rel="import" href="../../bower_components/polymerfire/firebase-document.html">
+<link rel="import" href="user-helper.html">
 <link rel="import" href="../shared-styles.html">
 
 <dom-module id="my-hospital-hearing">
@@ -69,6 +70,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         display:flex;
         justify-content: space-between;
       }
+
+      #receiptLink{
+        text-decoration:none;
+        margin-bottom:16px;
+        display:block;
+        text-align:right;
+      }
     </style>
 
     <firebase-auth
@@ -90,6 +98,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <paper-button class="leftButton wideButton" on-tap="openWrapper"><div class="nameDateWrapper"><div>[[displayName]]</div><div>[[displayDate]]</div></div></paper-button>
 
     <iron-collapse id="wrapper" class="wrapper">
+
+      <user-helper set-display-name="患者詳細" id="userHelper" params="[[hearingData.patientId]]"></user-helper>
 
       <div id="inspectImgWrapper">
         <div id="redDot"></div>
@@ -150,6 +160,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <div>¥ [[hearingData.price]]</div>
       </div>
 
+      <a id="receiptLink" href="/receipt/[[params]]"><paper-button class="mainBtn" raised>領収書を見る</paper-button></a>
+
 
       <paper-button class="wideButton" id="closeButton" raised on-tap="openWrapper">閉じる</paper-button>
 
@@ -206,6 +218,22 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
       }
 
+      toggleUserHelper(){
+        if(this.userType == "patient"){
+          this.$.userHelper.hidden = true
+        }else{
+          this.$.userHelper.hidden = false
+        }
+      }
+
+      toggleReceiptLink(){
+        if(this.userType == "patient"){
+          this.$.receiptLink.hidden = false
+        }else{
+          this.$.receiptLink.hidden = true
+        }
+      }
+
       changeDisplayName(){
         // console.log("display name change", this.hearingData)
         if(this.userType == "patient"){
@@ -214,6 +242,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           this.displayName = this.hearingData.patientName
         }
         this.togglePrice()
+        this.toggleUserHelper()
+        this.toggleReceiptLink()
       }
 
       placeRedDot(){

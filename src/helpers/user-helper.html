@@ -129,6 +129,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             type: Object,
             observer: 'userTypeChanged'
           },
+          setDisplayName: String,
           userData: Object,
           displayName: {
             type: String,
@@ -140,6 +141,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       changeDisplayName(){
         if(!this.userData){
           return
+        }
+        if(this.setDisplayName){
+          return this.setDisplayName
         }
         if(this.userType == "patient"){
           return this.userData.patientName

@@ -12,6 +12,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../bower_components/paper-input/paper-textarea.html">
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-toast/paper-toast.html">
 <link rel="import" href="../bower_components/iron-collapse/iron-collapse.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-document.html">
@@ -32,6 +33,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       #signOutButton{
         width:100%;
         margin-top:50px;
+      }
+
+      #patientPassword, #hospitalPassword{
+        margin-bottom:16px;
       }
     </style>
 
@@ -62,7 +67,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       <iron-collapse id="patientLogin">
         <paper-input id="patientEmail" label="メールアドレス" required auto-validate></paper-input>
-        <paper-input id="patientPassword" label="パスワード" type="password" required auto-validate></paper-input>
+        <paper-input id="patientPassword" label="パスワード" minlength="6" error-message="6文字以上入力してください" type="password" required auto-validate></paper-input>
         <paper-button on-tap="loginPatient" class="mainBtn" raised>ログイン</paper-button>
         <paper-button on-tap="createPatient">新規登録</paper-button>
       </iron-collapse>
@@ -74,8 +79,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <paper-input id="patientJob" value="[[userProfile.patientJob]]" label="職業" required auto-validate></paper-input>
         <paper-input id="patientAddress" value="[[userProfile.patientAddress]]" label="現住所" required auto-validate></paper-input>
         <paper-input id="patientPhoneNumber" value="[[userProfile.patientPhoneNumber]]" label="電話番号" required auto-validate></paper-input>
-        <paper-textarea id="patientSportsHistory" value="[[userProfile.patientSportsHistory]]" label="スポーツ歴" required auto-validate></paper-textarea>
-        <paper-button on-tap="inputPatient" raised class="mainBtn">登録</paper-button>
+        <paper-textarea always-float-label id="patientSportsHistory" value="[[userProfile.patientSportsHistory]]" label="スポーツ歴" required auto-validate></paper-textarea>
+        <paper-button on-tap="inputPatient" raised class="mainBtn">保存</paper-button>
       </iron-collapse>
 
       
@@ -85,7 +90,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   
       <iron-collapse id="hospitalLogin">
         <paper-input id="hospitalEmail" label="メールアドレス" required auto-validate></paper-input>
-        <paper-input id="hospitalPassword" label="パスワード" type="password" required auto-validate></paper-input>
+        <paper-input id="hospitalPassword" label="パスワード" type="password" minlength="6" error-message="6文字以上入力してください" required auto-validate></paper-input>
         <paper-button on-tap="loginHospital" class="mainBtn" raised>ログイン</paper-button>
         <paper-button on-tap="createHospital">新規登録</paper-button>
       </iron-collapse>
@@ -95,12 +100,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <paper-input id="hospitalRepresentativeName" value="[[userProfile.hospitalRepresentativeName]]" label="代表者氏名" required auto-validate></paper-input>
         <paper-input id="hospitalAddress" value="[[userProfile.hospitalAddress]]" label="住所" required auto-validate></paper-input>
         <paper-input id="hospitalPhoneNumber" value="[[userProfile.hospitalPhoneNumber]]" label="電話番号" required auto-validate></paper-input>
-        <paper-button on-tap="inputHospital" raised class="mainBtn">登録</paper-button>
+        <paper-button on-tap="inputHospital" raised class="mainBtn">保存</paper-button>
       </iron-collapse>
 
       <paper-button id="signOutButton" hidden="[[!user]]" on-tap="signOut">ログアウト</paper-button>
 
     </div>
+
+    <paper-toast id="toast"></paper-toast>
+
   </template>
 
   <script>
@@ -119,6 +127,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           },
           userProfile: Object
         }
+      }
+
+      openToast(text){
+        this.$.toast.text = text
+        this.$.toast.open()
       }
 
       _clearPassword(){
@@ -171,20 +184,22 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         const that = this
         const email = this.$.patientEmail.value
         const password = this.$.patientPassword.value
+        this.openToast("ログイン中...")
         this.$.auth.signInWithEmailAndPassword(email, password)
         .then(function(response){
-
+          that._clearPassword()
+          that.openToast("ログインしました。")
         })
         .catch(function(error){
           console.log(error)
         })
-        this._clearPassword()
       }
 
       createPatient(){
         const that = this
         const email = this.$.patientEmail.value
         const password = this.$.patientPassword.value
+        this.openToast("ユーザーを作成中...")
         this.$.auth.createUserWithEmailAndPassword(email, password)
         .then(function(response){
           that.$.patientLogin.hide()
@@ -192,31 +207,34 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           that.$.patientRegister.show()
           const ref = window.firebase.database().ref().child("users/" + response.uid)
           ref.set({type: "patient"})
+          that._clearPassword()
+          that.openToast("ユーザー情報を入力してください。")
         })
         .catch(function(error){
           console.log(error)
         })
-        this._clearPassword()
       }
 
       loginHospital(){
         const that = this
         const email = this.$.hospitalEmail.value
         const password = this.$.hospitalPassword.value
+        this.openToast("ログイン中...")
         this.$.auth.signInWithEmailAndPassword(email, password)
         .then(function(response){
-
+          that._clearPassword()
+          that.openToast("ログインしました。")
         })
         .catch(function(error){
           console.log(error)
         })
-        this._clearPassword()
       }
 
       createHospital(){
         const that = this
         const email = this.$.hospitalEmail.value
         const password = this.$.hospitalPassword.value
+        this.openToast("ユーザーの作成中...")
         this.$.auth.createUserWithEmailAndPassword(email, password)
         .then(function(response){
           that.$.patientLogin.hide()
@@ -224,11 +242,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           that.$.hospitalRegister.show()
           const ref = window.firebase.database().ref().child("users/" + response.uid)
           ref.set({type: "hospital"})
+          that._clearPassword()
+          that.openToast("ユーザー情報を入力してください。")
         })
         .catch(function(error){
           console.log(error)
         })
-        this._clearPassword()
       }
 
       inputPatient(){
@@ -252,6 +271,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           patientEmail: patientEmail
         }
         window.firebase.database().ref().child("users/" + this.user.uid + "/profile").set(info)
+        this.openToast("情報が登録されました。")
       }
 
       inputHospital(){
@@ -269,10 +289,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           hospitalEmail: hospitalEmail
         }
         window.firebase.database().ref().child("users/" + this.user.uid + "/profile").set(info)
+        this.openToast("情報が登録されました。")
       }
 
       signOut(){
         this.$.auth.signOut()
+        this.openToast("ログアウトしました。")
       }
 
     }

@@ -1,0 +1,133 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/iron-collapse/iron-collapse.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-document.html">
+<link rel="import" href="shared-styles.html">
+
+<dom-module id="my-receipt">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+      }
+
+      #pricePatient{
+        display:flex;
+        justify-content: space-between;
+      }
+
+      .hospitalInfo{
+        text-align:right;
+      }
+
+      #date{
+        font-size:12px;
+        font-weight:200;
+      }
+
+      #price{
+        font-size:24px;
+        font-weight:700;
+        margin: 8px 0 12px 0;
+      }
+    </style>
+
+    <firebase-auth
+    id="auth"
+    user="{{user}}"
+    on-error="handleError">
+    </firebase-auth>
+
+    <firebase-document
+      path="users/[[user.uid]]/hearings/[[params]]"
+      data="{{hearingData}}">
+    </firebase-document>
+
+    <firebase-document
+      path="users/[[hearingData.hospitalId]]/profile"
+      data="{{hospitalData}}">
+    </firebase-document>
+
+    <div class="card">
+      
+      <div>
+        <h2>領収書</h2>
+        <div id="date">[[displayDate]]</div>
+        <div id="patientName">[[hearingData.patientName]] 様</div>
+        <div id="price">¥ [[formattedPrice]]</div>
+        <div class="hospitalInfo" id="hospitalName">[[hospitalData.hospitalName]]</div>
+        <div class="hospitalInfo" id="hospitalAddress">[[hospitalData.hospitalAddress]]</div>
+        <div class="hospitalInfo" id="hospitalPhone">Tel: [[hospitalData.hospitalPhoneNumber]]</div>
+      </div>
+
+
+    </div>
+
+  </template>
+
+  <script>
+    class MyReceipt extends Polymer.Element {
+      static get is() { return 'my-receipt'; }
+
+      static get properties() {
+        return {
+          //hearing key in this case
+          params: String,
+          user: Object,
+          hearingData: {
+            type: Object,
+            observer: 'formatStuff'
+          },
+          hosiptalData: Object,
+          displayDate: String,
+          formattedPrice: String
+        }
+      }
+
+      formatStuff(){
+        this.convertToDate()
+        this.formatPrice()
+      }
+
+      formatPrice(){
+        if(!this.hearingData) return
+        if(!this.hearingData.price) return
+        var nStr = this.hearingData.price
+         nStr += ''
+         var x = nStr.split('.')
+         var x1 = x[0]
+         var x2 = x.length > 1 ? '.' + x[1] : ''
+         var rgx = /(\d+)(\d{3})/
+         while (rgx.test(x1)) {
+          x1 = x1.replace(rgx, '$1' + ',' + '$2')
+         }
+         console.log("formatted price", x1 + x2)
+         this.formattedPrice = x1 + x2
+      }
+
+      convertToDate(){
+        // console.log("convertotodate")
+        if(!this.hearingData) return
+        // console.log(this.hearingData)
+        if(!this.hearingData.time) return
+        const d = new Date(this.hearingData.time)
+        this.displayDate =  d.getFullYear() +"/" + (d.getMonth()+1) + "/" + d.getDate()
+      }
+
+    }
+
+    window.customElements.define(MyReceipt.is, MyReceipt);
+  </script>
+</dom-module>

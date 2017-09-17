@@ -139,7 +139,7 @@
         }
         const that = this
         const firebase = window.firebase
-        console.log("newestQuestionKey", this.newestQuestionKey)
+        // console.log("newestQuestionKey", this.newestQuestionKey)
         window.firebase.database().ref("users/" + this.user.uid + "/hearings").off()
         const listenQuery = firebase.database().ref("users/" + this.user.uid + "/hearings").startAt(null, this.newestQuestionKey)
         listenQuery.on('value', function(snapshot) {
@@ -148,17 +148,17 @@
             count++
           })
 
-          console.log("count", count)
+          // console.log("count", count)
           if(count > 1){
-            console.log("open")
+            // console.log("open")
             that.$.reloadButtonWrapper.show()
           }else{
-            console.log("close")
+            // console.log("close")
             that.$.reloadButtonWrapper.hide()
           }
 
           const snap = snapshot.val()
-          console.log("listenForNewHearings", snap)
+          // console.log("listenForNewHearings", snap)
         })
       }
 
