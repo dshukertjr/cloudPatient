@@ -20,6 +20,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <style include="shared-styles">
       :host {
         display: block;
+        border-bottom:1px solid #ccc;
       }
 
       .nameWrapper{
@@ -92,6 +93,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <div calss="property">[[userData.patientSportsHistory]]</div>
       </div>
       
+      <div id="hospitalRepresentativeName" class="categoryWrapper hospital">
+        <div class="label">代表者</div>
+        <div calss="property">[[userData.hospitalRepresentativeName]]</div>
+      </div>
+      
       <div class="categoryWrapper hospital">
         <div class="label">Email</div>
         <div calss="property">[[userData.hospitalEmail]]</div>
@@ -131,9 +137,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           },
           setDisplayName: String,
           userData: Object,
+          admin: Object,
           displayName: {
             type: String,
-            computed: 'changeDisplayName(userData, userType)'
+            value: "読み込み中...",
+            computed: 'changeDisplayName(userData)'
           },
         }
       }
@@ -145,10 +153,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         if(this.setDisplayName){
           return this.setDisplayName
         }
-        if(this.userType == "patient"){
+        // if(this.userType == "patient"){
+        //   return this.userData.patientName
+        // }else if(this.userType == "hospital"){
+        //   return this.userData.hospitalName
+        // }
+        if(this.userData.patientName){
           return this.userData.patientName
-        }else if(this.userType == "hospital"){
+        }else if(this.userData.hospitalName){
           return this.userData.hospitalName
+        }else{
+          return "未登録"
         }
       }
 
@@ -176,8 +191,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           for(var i = 0; i < hospitals.length; i++){
             hospitals[i].hidden = false
           }
-
         }
+
+        if(this.admin){
+          this.$.hospitalRepresentativeName.hidden = false
+        }else{
+          this.$.hospitalRepresentativeName.hidden = true
+        }
+
       }
 
       openWrapper(){

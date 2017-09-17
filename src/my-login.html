@@ -150,7 +150,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       _userChanged(){
-        console.log(this.user)
         if(this.user){
           this.$.patientLoginBtn.hide()
           this.$.patientLogin.hide()
@@ -167,7 +166,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       _userMetaChanged(){
-        console.log("called")
         if(this.userMeta == "patient"){
           this.$.patientRegister.show()
           this.$.hospitalRegister.hide()
@@ -191,6 +189,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           that.openToast("ログインしました。")
         })
         .catch(function(error){
+          that.openToast("ログインに失敗しました。")
           console.log(error)
         })
       }
@@ -211,6 +210,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           that.openToast("ユーザー情報を入力してください。")
         })
         .catch(function(error){
+          that.openToast("ユーザーの作成に失敗しました。")
           console.log(error)
         })
       }
@@ -227,6 +227,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         })
         .catch(function(error){
           console.log(error)
+          that.openToast("ログインに失敗しました。")
         })
       }
 
@@ -247,6 +248,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         })
         .catch(function(error){
           console.log(error)
+          that.openToast("ユーザーの作成に失敗しました。")
         })
       }
 

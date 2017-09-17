@@ -22,7 +22,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <style include="shared-styles">
       :host {
         display: block;
-        border-bottom:1px solid #aaa;
+        border-bottom:1px solid #ccc;
       }
 
       #inspectImg{
@@ -185,7 +185,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             type: Object,
             observer: 'changeDisplayName'
           },
-          displayName: Object,
+          displayName: {
+            type: String,
+            value: "読み込み中..."
+          },
           displayDate: String,
         }
       }

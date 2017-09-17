@@ -1,0 +1,120 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-query.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-document.html">
+<link rel="import" href="helpers/user-helper.html">
+<link rel="import" href="shared-styles.html">
+
+<dom-module id="my-admin-users">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+      }
+
+      #tabs{
+        font-size:0;
+      }
+
+      #tabs>paper-button{
+        width:50%;
+        font-size:16px;
+        margin:0;
+      }
+    </style>
+
+    <firebase-auth
+    id="auth"
+    user="{{user}}"
+    on-error="handleError">
+    </firebase-auth>
+
+    <firebase-query
+      id="query"
+      path="users"
+      order-by-child="type"
+      disabled="true"
+      data="{{users}}">
+    </firebase-query>
+
+    <firebase-document
+      id="userType"
+      path="/users/[[user.uid]]/type"
+      data="{{userType}}">
+    </firebase-document>
+
+
+    <div class="card">
+
+      <div id="tabs">
+        <paper-button id="viewPatients" on-tap="viewPatients">患者</paper-button>
+        <paper-button id="viewHospitals" on-tap="viewHospitals">治療院</paper-button>
+      </div>
+
+      <template is="dom-repeat" items="[[users]]" sort="_computeSort">
+        <user-helper admin="true" params="[[item.$key]]"></user-helper>
+      </template>
+
+    </div>
+  </template>
+
+  <script>
+    class MyAdminUsers extends Polymer.Element {
+      static get is() { return 'my-admin-users'; }
+
+      static get properties() {
+        return {
+          user: Object,
+          userType: {
+            type: Object,
+            observer: 'userTypeChanged',
+          },
+          users: Object,
+        }
+      }
+
+      userTypeChanged(){
+        if(this.userType == "admin"){
+          this.$.query.disabled = false
+          this.viewPatients()
+        }else{
+          this.$.query.disabled = true
+        }
+      }
+
+      viewPatients(){
+        this.$.query.equalTo = "patient"
+        this.$.viewPatients.classList.add("mainBtn")
+        this.$.viewHospitals.classList.remove("mainBtn")
+      }
+
+      viewHospitals(){
+        this.$.query.equalTo = "hospital"
+        this.$.viewPatients.classList.remove("mainBtn")
+        this.$.viewHospitals.classList.add("mainBtn")
+      }
+
+      _computeSort(a, b) {
+        // http://stackoverflow.com/questions/33953938/polymer-1-0-sorting-dom-repeat
+        if (a.$key == b.$key) {
+          return 0;
+        }
+        return a.$key > b.$key ? -1 : 1;
+      }
+
+    }
+
+    window.customElements.define(MyAdminUsers.is, MyAdminUsers);
+  </script>
+</dom-module>
