@@ -37,6 +37,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     <div class="card">
 
+      <div id="noneMessage">まだデータがありません。</div>
+
       <template is="dom-repeat" items="[[users]]" sort="_computeSort">
         <user-helper params="[[item.$key]]"></user-helper>
       </template>
@@ -51,7 +53,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       static get properties() {
         return {
           user: Object,
-          users: Object
+          users: {
+            type: Object,
+            observer: 'toggleNoneMessage'
+          }
+        }
+      }
+
+      toggleNoneMessage(){
+        if(!this.users){
+          this.$.noneMessage.hidden = true
+        }else if(this.users.length > 0){
+          this.$.noneMessage.hidden = true
+        }else{
+          this.$.noneMessage.hidden = false
         }
       }
 

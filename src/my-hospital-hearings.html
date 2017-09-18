@@ -3,6 +3,7 @@
 
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../bower_components/iron-collapse/iron-collapse.html">
+<link rel="import" href="../bower_components/iron-icon/iron-icon.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-query.html">
 <link rel="import" href="helpers/my-hospital-hearing.html">
@@ -39,12 +40,29 @@
         margin: 30px 0;
       }
 
+      .card>#noneMessage{
+        margin:0;
+      }
+
       .question{
         font-weight:200;
       }
 
       .answer{
         font-weight:700;
+      }
+
+      #reloadButtonWrapper{
+        text-align:right;
+      }
+
+      #reloadButton{
+        color:#fff;
+        background:#FF7043;
+      }
+
+      #reloadButton>iron-icon{
+        margin-right:8px;
       }
     </style>
 
@@ -62,8 +80,10 @@
  -->
     <div class="card">
 
+      <div id="noneMessage">まだデータがありません。</div>
+
       <iron-collapse id="reloadButtonWrapper">
-        <paper-icon-button id="reloadButton" on-tap="loadHearings" icon="my-icons:cached"></paper-icon-button>
+        <paper-button id="reloadButton" on-tap="loadHearings"><iron-icon icon="my-icons:cached"></iron-icon>新着予診票</paper-button>
       </iron-collapse>
 
 
@@ -86,11 +106,24 @@
             type: Object,
             observer: 'loadHearings'
           },
-          hearings: Object,
+          hearings: {
+            type: Object,
+            observer: 'toggleNoneMessage'
+          },
           newestQuestionKey: {
             type: String,
             observer: 'listenForNewHearings'
           }
+        }
+      }
+
+      toggleNoneMessage(){
+        if(!this.hearings){
+          this.$.noneMessage.hidden = true
+        }else if(this.hearings.length > 0){
+          this.$.noneMessage.hidden = true
+        }else{
+          this.$.noneMessage.hidden = false
         }
       }
 

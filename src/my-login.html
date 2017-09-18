@@ -35,8 +35,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         margin-top:50px;
       }
 
-      #patientPassword, #hospitalPassword{
+      #patientPassword, #hospitalPassword, #resetPasswordNewPassword{
         margin-bottom:16px;
+      }
+
+      .openResetPassword{
+        width:100%;
+      }
+
+      .openForgetPassword{
+        width:100%;
+        margin-top:16px;
       }
     </style>
 
@@ -70,6 +79,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <paper-input id="patientPassword" label="パスワード" minlength="6" error-message="6文字以上入力してください" type="password" required auto-validate></paper-input>
         <paper-button on-tap="loginPatient" class="mainBtn" raised>ログイン</paper-button>
         <paper-button on-tap="createPatient">新規登録</paper-button>
+        <div>
+          <paper-button class="openForgetPassword" on-tap="toggleForgetPassword">パスワードを忘れた</paper-button>
+        </div>
       </iron-collapse>
 
       <iron-collapse id="patientRegister">
@@ -81,6 +93,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <paper-input id="patientPhoneNumber" value="[[userProfile.patientPhoneNumber]]" label="電話番号" required auto-validate></paper-input>
         <paper-textarea always-float-label id="patientSportsHistory" value="[[userProfile.patientSportsHistory]]" label="スポーツ歴" required auto-validate></paper-textarea>
         <paper-button on-tap="inputPatient" raised class="mainBtn">保存</paper-button>
+        <div>
+          <paper-button class="openResetPassword" on-tap="toggleResetPassword">パスワードを変更</paper-button>
+        </div>
       </iron-collapse>
 
       
@@ -93,6 +108,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <paper-input id="hospitalPassword" label="パスワード" type="password" minlength="6" error-message="6文字以上入力してください" required auto-validate></paper-input>
         <paper-button on-tap="loginHospital" class="mainBtn" raised>ログイン</paper-button>
         <paper-button on-tap="createHospital">新規登録</paper-button>
+        <div>
+          <paper-button class="openForgetPassword" on-tap="toggleForgetPassword">パスワードを忘れた</paper-button>
+        </div>
       </iron-collapse>
 
       <iron-collapse id="hospitalRegister">
@@ -101,7 +119,23 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <paper-input id="hospitalAddress" value="[[userProfile.hospitalAddress]]" label="住所" required auto-validate></paper-input>
         <paper-input id="hospitalPhoneNumber" value="[[userProfile.hospitalPhoneNumber]]" label="電話番号" required auto-validate></paper-input>
         <paper-button on-tap="inputHospital" raised class="mainBtn">保存</paper-button>
+        <div>
+          <paper-button class="openResetPassword" on-tap="toggleResetPassword">パスワードを変更</paper-button>
+        </div>
+        </iron-collapse>
+
+      <iron-collapse id="resetPassword">
+        <paper-input id="resetPasswordEmail" label="メールアドレス" required auto-validate></paper-input>
+        <paper-input id="resetPasswordCurrentPassword" label="現在のパスワード" type="password"></paper-input>
+        <paper-input id="resetPasswordNewPassword" label="新しいパスワード" type="password" minlength="6" error-message="6文字以上入力してください" required auto-validate></paper-input>
+        <paper-button on-tap="resetPassword" raised class="mainBtn">変更</paper-button>
       </iron-collapse>
+
+      <iron-collapse id="forgetPassword">
+        <paper-input id="forgetdPasswordEmail" label="メールアドレス" required auto-validate></paper-input>
+        <paper-button on-tap="forgetPassword" raised class="mainBtn">送信</paper-button>
+      </iron-collapse>
+
 
       <paper-button id="signOutButton" hidden="[[!user]]" on-tap="signOut">ログアウト</paper-button>
 
@@ -129,6 +163,53 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
       }
 
+      resetPassword(){
+        const email = this.$.resetPasswordEmail.value
+        const currentPassword = this.$.resetPasswordCurrentPassword.value
+        const newPassword = this.$.resetPasswordNewPassword.value
+        const that = this
+        var user = window.firebase.auth().currentUser
+        var credential = window.firebase.auth.EmailAuthProvider.credential(email, currentPassword)
+
+        this.openToast("ログイン確認中...")
+
+        // reauthenicate the user first
+        user.reauthenticateWithCredential(credential).then(function() {
+
+          user.updatePassword(newPassword).then(function() {
+            that.openToast("パスワードが新しいものに変更されました。")
+            that.$.resetPasswordCurrentPassword.value = null
+            that.$.resetPasswordNewPassword.value = null
+            that.$.resetPassword.hide()
+          }).catch(function(error) {
+            that.openToast("パスワードの変更に失敗しました。")
+          })
+
+        }).catch(function(error) {
+          that.openToast("ログイン確認に失敗しました。")
+        })
+      }
+
+      forgetPassword(){
+        var auth = window.firebase.auth();
+        const email = this.$.forgetdPasswordEmail.value
+        const that = this
+        this.openToast("確認中...")
+        auth.sendPasswordResetEmail(email).then(function() {
+          that.openToast("パスワードリセット用のEmailが送信されました。")
+        }).catch(function(error) {
+          that.openToast("エラーが起きました。")
+        })
+      }
+
+      toggleResetPassword(){
+        this.$.resetPassword.toggle()
+      }
+
+      toggleForgetPassword(){
+        this.$.forgetPassword.toggle()
+      }
+
       openToast(text){
         this.$.toast.text = text
         this.$.toast.open()
@@ -150,6 +231,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       _userChanged(){
+        this.$.resetPassword.hide()
+        this.$.forgetPassword.hide()
         if(this.user){
           this.$.patientLoginBtn.hide()
           this.$.patientLogin.hide()
