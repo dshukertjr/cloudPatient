@@ -139,6 +139,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         </iron-collapse>
 
         <iron-collapse id="forgetPassword">
+          <p>パスワードリセットのためのリンクを登録されているメールアドレスに送信いたします。</p>
           <paper-input id="forgetdPasswordEmail" label="メールアドレス" required auto-validate></paper-input>
           <paper-button on-tap="forgetPassword" raised class="mainBtn">送信</paper-button>
         </iron-collapse>
@@ -184,7 +185,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           this.$.preloaderWrapper.show()
           this.$.afterLogin.hide()
         }
-
       }
 
       resetPassword(){
