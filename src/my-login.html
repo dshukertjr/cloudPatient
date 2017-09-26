@@ -12,6 +12,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../bower_components/paper-input/paper-textarea.html">
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-spinner/paper-spinner-lite.html">
 <link rel="import" href="../bower_components/paper-toast/paper-toast.html">
 <link rel="import" href="../bower_components/iron-collapse/iron-collapse.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
@@ -52,6 +53,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <firebase-auth
     id="auth"
     user="{{user}}"
+    status-known="{{statusKnown}}"
     on-error="handleError">
     </firebase-auth>
 
@@ -70,75 +72,82 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     <div class="card">
 
+      <iron-collapse id="preloaderWrapper" opened>
+        <paper-spinner-lite active></paper-spinner-lite>
+      </iron-collapse>
+
+      <iron-collapse id="afterLogin">
       <iron-collapse id="patientLoginBtn">
-        <paper-button class="navBtn" on-tap="_togglePatientLogin">患者としてログイン/登録</paper-button>
-      </iron-collapse>
-
-      <iron-collapse id="patientLogin">
-        <paper-input id="patientEmail" label="メールアドレス" required auto-validate></paper-input>
-        <paper-input id="patientPassword" label="パスワード" minlength="6" error-message="6文字以上入力してください" type="password" required auto-validate></paper-input>
-        <paper-button on-tap="loginPatient" class="mainBtn" raised>ログイン</paper-button>
-        <paper-button on-tap="createPatient">新規登録</paper-button>
-        <div>
-          <paper-button class="openForgetPassword" on-tap="toggleForgetPassword">パスワードを忘れた</paper-button>
-        </div>
-      </iron-collapse>
-
-      <iron-collapse id="patientRegister">
-        <paper-input id="patientName" value="[[userProfile.patientName]]" label="名前" required auto-validate></paper-input>
-        <paper-input id="patientHurigana" value="[[userProfile.patientHurigana]]" label="ふりがな" required auto-validate></paper-input>
-        <paper-input id="patientBirthday" value="[[userProfile.patientBirthday]]" label="生年月日" required auto-validate></paper-input>
-        <paper-input id="patientJob" value="[[userProfile.patientJob]]" label="職業" required auto-validate></paper-input>
-        <paper-input id="patientAddress" value="[[userProfile.patientAddress]]" label="現住所" required auto-validate></paper-input>
-        <paper-input id="patientPhoneNumber" value="[[userProfile.patientPhoneNumber]]" label="電話番号" required auto-validate></paper-input>
-        <paper-textarea always-float-label id="patientSportsHistory" value="[[userProfile.patientSportsHistory]]" label="スポーツ歴" required auto-validate></paper-textarea>
-        <paper-button on-tap="inputPatient" raised class="mainBtn">保存</paper-button>
-        <div>
-          <paper-button class="openResetPassword" on-tap="toggleResetPassword">パスワードを変更</paper-button>
-        </div>
-      </iron-collapse>
-
-      
-      <iron-collapse id="hospitalLoginBtn">
-        <paper-button class="navBtn" on-tap="_toggleHospitalLogin">治療院としてログイン/登録</paper-button>
-      </iron-collapse>
-  
-      <iron-collapse id="hospitalLogin">
-        <paper-input id="hospitalEmail" label="メールアドレス" required auto-validate></paper-input>
-        <paper-input id="hospitalPassword" label="パスワード" type="password" minlength="6" error-message="6文字以上入力してください" required auto-validate></paper-input>
-        <paper-button on-tap="loginHospital" class="mainBtn" raised>ログイン</paper-button>
-        <paper-button on-tap="createHospital">新規登録</paper-button>
-        <div>
-          <paper-button class="openForgetPassword" on-tap="toggleForgetPassword">パスワードを忘れた</paper-button>
-        </div>
-      </iron-collapse>
-
-      <iron-collapse id="hospitalRegister">
-        <paper-input id="hospitalName" value="[[userProfile.hospitalName]]" label="治療院名" required auto-validate></paper-input>
-        <paper-input id="hospitalRepresentativeName" value="[[userProfile.hospitalRepresentativeName]]" label="代表者氏名" required auto-validate></paper-input>
-        <paper-input id="hospitalAddress" value="[[userProfile.hospitalAddress]]" label="住所" required auto-validate></paper-input>
-        <paper-input id="hospitalPhoneNumber" value="[[userProfile.hospitalPhoneNumber]]" label="電話番号" required auto-validate></paper-input>
-        <paper-button on-tap="inputHospital" raised class="mainBtn">保存</paper-button>
-        <div>
-          <paper-button class="openResetPassword" on-tap="toggleResetPassword">パスワードを変更</paper-button>
-        </div>
+          <paper-button class="navBtn" on-tap="_togglePatientLogin">患者としてログイン/登録</paper-button>
         </iron-collapse>
 
-      <iron-collapse id="resetPassword">
-        <paper-input id="resetPasswordEmail" label="メールアドレス" required auto-validate></paper-input>
-        <paper-input id="resetPasswordCurrentPassword" label="現在のパスワード" type="password"></paper-input>
-        <paper-input id="resetPasswordNewPassword" label="新しいパスワード" type="password" minlength="6" error-message="6文字以上入力してください" required auto-validate></paper-input>
-        <paper-button on-tap="resetPassword" raised class="mainBtn">変更</paper-button>
+        <iron-collapse id="patientLogin">
+          <paper-input id="patientEmail" label="メールアドレス" required auto-validate></paper-input>
+          <paper-input id="patientPassword" label="パスワード" minlength="6" error-message="6文字以上入力してください" type="password" required auto-validate></paper-input>
+          <paper-button on-tap="loginPatient" class="mainBtn" raised>ログイン</paper-button>
+          <paper-button on-tap="createPatient">新規登録</paper-button>
+          <div>
+            <paper-button class="openForgetPassword" on-tap="toggleForgetPassword">パスワードを忘れた</paper-button>
+          </div>
+        </iron-collapse>
+
+        <iron-collapse id="patientRegister">
+          <paper-input id="patientName" value="[[userProfile.patientName]]" label="名前" required auto-validate></paper-input>
+          <paper-input id="patientHurigana" value="[[userProfile.patientHurigana]]" label="ふりがな" required auto-validate></paper-input>
+          <paper-input id="patientBirthday" value="[[userProfile.patientBirthday]]" label="生年月日" required auto-validate></paper-input>
+          <paper-input id="patientJob" value="[[userProfile.patientJob]]" label="職業" required auto-validate></paper-input>
+          <paper-input id="patientAddress" value="[[userProfile.patientAddress]]" label="現住所" required auto-validate></paper-input>
+          <paper-input id="patientPhoneNumber" value="[[userProfile.patientPhoneNumber]]" label="電話番号" required auto-validate></paper-input>
+          <paper-textarea always-float-label id="patientSportsHistory" value="[[userProfile.patientSportsHistory]]" label="スポーツ歴" required auto-validate></paper-textarea>
+          <paper-button on-tap="inputPatient" raised class="mainBtn">保存</paper-button>
+          <div>
+            <paper-button class="openResetPassword" on-tap="toggleResetPassword">パスワードを変更</paper-button>
+          </div>
+        </iron-collapse>
+
+        
+        <iron-collapse id="hospitalLoginBtn">
+          <paper-button class="navBtn" on-tap="_toggleHospitalLogin">治療院としてログイン/登録</paper-button>
+        </iron-collapse>
+    
+        <iron-collapse id="hospitalLogin">
+          <paper-input id="hospitalEmail" label="メールアドレス" required auto-validate></paper-input>
+          <paper-input id="hospitalPassword" label="パスワード" type="password" minlength="6" error-message="6文字以上入力してください" required auto-validate></paper-input>
+          <paper-button on-tap="loginHospital" class="mainBtn" raised>ログイン</paper-button>
+          <paper-button on-tap="createHospital">新規登録</paper-button>
+          <div>
+            <paper-button class="openForgetPassword" on-tap="toggleForgetPassword">パスワードを忘れた</paper-button>
+          </div>
+        </iron-collapse>
+
+        <iron-collapse id="hospitalRegister">
+          <paper-input id="hospitalName" value="[[userProfile.hospitalName]]" label="治療院名" required auto-validate></paper-input>
+          <paper-input id="hospitalRepresentativeName" value="[[userProfile.hospitalRepresentativeName]]" label="代表者氏名" required auto-validate></paper-input>
+          <paper-input id="hospitalAddress" value="[[userProfile.hospitalAddress]]" label="住所" required auto-validate></paper-input>
+          <paper-input id="hospitalPhoneNumber" value="[[userProfile.hospitalPhoneNumber]]" label="電話番号" required auto-validate></paper-input>
+          <paper-button on-tap="inputHospital" raised class="mainBtn">保存</paper-button>
+          <div>
+            <paper-button class="openResetPassword" on-tap="toggleResetPassword">パスワードを変更</paper-button>
+          </div>
+          </iron-collapse>
+
+        <iron-collapse id="resetPassword">
+          <paper-input id="resetPasswordEmail" label="メールアドレス" required auto-validate></paper-input>
+          <paper-input id="resetPasswordCurrentPassword" label="現在のパスワード" type="password"></paper-input>
+          <paper-input id="resetPasswordNewPassword" label="新しいパスワード" type="password" minlength="6" error-message="6文字以上入力してください" required auto-validate></paper-input>
+          <paper-button on-tap="resetPassword" raised class="mainBtn">変更</paper-button>
+        </iron-collapse>
+
+        <iron-collapse id="forgetPassword">
+          <paper-input id="forgetdPasswordEmail" label="メールアドレス" required auto-validate></paper-input>
+          <paper-button on-tap="forgetPassword" raised class="mainBtn">送信</paper-button>
+        </iron-collapse>
+
+
+        <paper-button id="signOutButton" hidden="[[!user]]" on-tap="signOut">ログアウト</paper-button>
       </iron-collapse>
 
-      <iron-collapse id="forgetPassword">
-        <paper-input id="forgetdPasswordEmail" label="メールアドレス" required auto-validate></paper-input>
-        <paper-button on-tap="forgetPassword" raised class="mainBtn">送信</paper-button>
-      </iron-collapse>
-
-
-      <paper-button id="signOutButton" hidden="[[!user]]" on-tap="signOut">ログアウト</paper-button>
-
+  
     </div>
 
     <paper-toast id="toast"></paper-toast>
@@ -155,12 +164,27 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             type: Object,
             observer: '_userChanged'
           },
+          statusKnown: {
+            type: Object,
+            observer: '_statusKnownChanged'
+          },
           userMeta: {
             type: Object,
             observer: '_userMetaChanged'
           },
           userProfile: Object
         }
+      }
+
+      _statusKnownChanged(){
+        if(this.statusKnown){
+          this.$.preloaderWrapper.hide()
+          this.$.afterLogin.show()
+        }else{
+          this.$.preloaderWrapper.show()
+          this.$.afterLogin.hide()
+        }
+
       }
 
       resetPassword(){
