@@ -191,12 +191,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           for(var i = 0; i < hospitals.length; i++){
             hospitals[i].hidden = false
           }
-        }
 
-        if(this.admin){
-          this.$.hospitalRepresentativeName.hidden = false
-        }else{
-          this.$.hospitalRepresentativeName.hidden = true
+          if(this.admin){
+            this.$.hospitalRepresentativeName.hidden = false
+          }else{
+            this.$.hospitalRepresentativeName.hidden = true
+          }
         }
 
       }
