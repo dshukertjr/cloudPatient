@@ -84,6 +84,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       #closeButton{
         margin-top:16px;
       }
+
+      #openButton{
+        transition:background 0.2s;
+      }
     </style>
 
     <firebase-auth
@@ -93,6 +97,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </firebase-auth>
 
     <firebase-document
+      id="hearingDataDocument"
       path="users/[[user.uid]]/hearings/[[params]]"
       data="{{hearingData}}">
     </firebase-document>
@@ -102,7 +107,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       data="{{userType}}">
     </firebase-document>
 
-    <paper-button class="leftButton wideButton" on-tap="openWrapper"><div class="nameDateWrapper"><div>[[displayName]]</div><div>[[displayDate]]</div></div></paper-button>
+    <paper-button id="openButton" class="leftButton wideButton" on-tap="openWrapper"><div class="nameDateWrapper"><div>[[displayName]]</div><div>[[displayDate]]</div></div></paper-button>
 
     <iron-collapse id="wrapper" class="wrapper">
 
@@ -328,15 +333,30 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             redDot.style.left = "calc(" + left + "% - 15px)"
             redDot.style.top = "calc(" + top + "% - 15px)"
           })
-        }
-
-  
+        }  
         //call change display name when hearing Data changed
         this.changeDisplayName()
         this.convertToDate()
+        this.determineIfNew()
+      }
+
+      determineIfNew(){
+        if(!this.hearingData) return
+        console.log("read", this.hearingData.read)
+        if(this.hearingData.read){
+          this.$.openButton.style.background = null
+        }else{
+          this.$.openButton.style.background = "#E3F2FD"
+        }
       }
 
       openWrapper(){
+        const that = this
+        if(!this.hearingData.read){
+          this.$.hearingDataDocument.ref.child("read").set("true", function (err) {
+            that.determineIfNew()
+          })
+        }
         this.$.wrapper.toggle()
       }
 
