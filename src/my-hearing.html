@@ -242,16 +242,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     class MyHearing extends Polymer.Element {
       static get is() { return 'my-hearing'; }
 
-      placeRed(e){
-        this.$.redDot.style.opacity = 0.7
-        const offsetX = this.$.inspectImg.getBoundingClientRect().left
-        const offsetY = this.$.inspectImg.getBoundingClientRect().top
-        const tapX = e.pageX - offsetX - 10
-        const tapY = e.pageY - offsetY - 10
-        this.$.redDot.style.left = tapX + "px"
-        this.$.redDot.style.top = tapY + "px"
-      }
-
       static get properties() {
         return {
           //hospital key in this case
@@ -265,7 +255,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           statusKnown: {
             type: Object,
             observer: 'statusKnownChanged'
-          }
+          },
+          redLeft: Number,
+          redTop: Number,
         }
       }
 
@@ -364,6 +356,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
       }
 
+      placeRed(e){
+        this.$.redDot.style.opacity = 0.7
+        const offsetX = this.$.inspectImg.getBoundingClientRect().left
+        const offsetY = this.$.inspectImg.getBoundingClientRect().top
+        const tapX = e.pageX - offsetX - 10
+        const tapY = e.pageY - offsetY - 10
+        this.$.redDot.style.left = tapX + "px"
+        this.$.redDot.style.top = tapY + "px"
+        this.redLeft = tapX + 10
+        this.redTop = tapY + 10
+      }
+
       findRedDotCenter(){
         var left = parseInt(this.$.redDot.style.left) + 10
         var top = parseInt(this.$.redDot.style.top) + 10
@@ -383,36 +387,40 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       submit(){
         if(!this.params){
+          this.openToast("QRコードが正しく読み込めていませんでした。")
           return
         }
         if(!this.user){
+          this.openToast("ログインされていません。")
           return
         }
         if(!this.patientData || !this.hospitalData){
+          this.openToast("患者データ、治療院データが入力されていません。")
           return
         }
         const patientName = this.patientData.patientName
         const hospitalName = this.hospitalData.hospitalName
         if(!patientName || !hospitalName){
+          this.openToast("患者さんの名前か病院の名前が未入力です。")
           return
         }
-        const redDotCenter = this.findRedDotCenter()
-        const afterHealthyBody = this.$.afterHealthyBody.value
-        const howLong = this.$.howLong.value
-        const happenedWhere = this.$.happenedWhere.value
-        const fromWhat = this.$.fromWhat.value
-        const anyDisease = this.$.anyDisease.value
-        const fastOrSlow = this.$.fastOrSlow.value
-        const foundOutHow = this.$.foundOutHow.value
-        var others = this.$.others
-        if(!others) others = "なし"
-        var designatedDoctor = this.$.designatedDoctor
-        if(!designatedDoctor) designatedDoctor = "なし"
-        var additionalFoundOutHow = this.$.additionalFoundOutHow.value
-        if(!additionalFoundOutHow) additionalFoundOutHow = null
-        var possiblyPregnant = this.$.possiblyPregnant.value
-        if(!possiblyPregnant) possiblyPregnant = null
-        const introduceProfessional = this.$.introduceProfessional.value
+        // const redDotCenter = this.findRedDotCenter()
+        const redDotCenter = {
+          left: this.redLeft,
+          top: this.redTop
+        }
+        const afterHealthyBody = this.$.afterHealthyBody.value || null
+        const howLong = this.$.howLong.value || null
+        const happenedWhere = this.$.happenedWhere.value || null
+        const fromWhat = this.$.fromWhat.value || null
+        const anyDisease = this.$.anyDisease.value || null
+        const fastOrSlow = this.$.fastOrSlow.value || null
+        const foundOutHow = this.$.foundOutHow.value || null
+        const others = this.$.others.value || "なし"
+        const designatedDoctor = this.$.designatedDoctor.value || "なし"
+        const additionalFoundOutHow = this.$.additionalFoundOutHow.value || "なし"
+        const possiblyPregnant = this.$.possiblyPregnant.value || null
+        const introduceProfessional = this.$.introduceProfessional.value || null
         const time = new Date().getTime()
 
 
@@ -442,6 +450,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           introduceProfessional: introduceProfessional,
           time: time
         }
+
 
         newHospitalRef.set(inputs)
         newPatientRef.set(inputs)
