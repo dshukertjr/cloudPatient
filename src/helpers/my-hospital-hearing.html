@@ -37,8 +37,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       #inspectImgWrapper>div{
         background:red;
-        width:20px;
-        height:20px;
+        width:30px;
+        height:30px;
         border-radius:50%;
         box-shadow: 0 0 5px red;
         position:absolute;
@@ -281,16 +281,21 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       changeDisplayName(){
-        // console.log("display name change", this.hearingData)
-        if(this.userType == "patient"){
-          this.displayName = this.hearingData.hospitalName
-        }else{
-          this.displayName = this.hearingData.patientName
-        }
         this.togglePrice()
         this.toggleTreatment()
         this.toggleUserHelper()
         this.toggleReceiptLink()
+        // console.log("display name change", this.hearingData)
+        if(!this.hearingData) return
+        var displayName = ""
+        if(this.userType == "patient"){
+          displayName = this.hearingData.hospitalName
+        }else{
+          displayName = this.hearingData.patientName
+        }
+        if(displayName){
+          this.displayName = displayName
+        }
       }
 
       placeRedDot(){
@@ -304,20 +309,28 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         const redDotCenter = this.hearingData.redDotCenter
         const that = this
 
-        redDotCenter.forEach(function(center){
+        if(redDotCenter.left){
+          const center = redDotCenter
           const redDot = document.createElement("div")
           wrapper.prepend(redDot)
           const dot = that.$.wrapper.querySelector("#inspectImgWrapper>div")
           const left = center.left
           const top = center.top
-          redDot.style.left = "calc(" + left + "% - 10px)"
-          redDot.style.top = "calc(" + top + "% - 10px)"
-
-          dot.addEventListener("click", function(){
-            wrapper.removeChild(dot)
+          redDot.style.left = "calc(" + left + "% - 15px)"
+          redDot.style.top = "calc(" + top + "% - 15px)"
+        }else{
+          redDotCenter.forEach(function(center){
+            const redDot = document.createElement("div")
+            wrapper.prepend(redDot)
+            const dot = that.$.wrapper.querySelector("#inspectImgWrapper>div")
+            const left = center.left
+            const top = center.top
+            redDot.style.left = "calc(" + left + "% - 15px)"
+            redDot.style.top = "calc(" + top + "% - 15px)"
           })
-        })
+        }
 
+  
         //call change display name when hearing Data changed
         this.changeDisplayName()
         this.convertToDate()

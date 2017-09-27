@@ -4,6 +4,7 @@
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../bower_components/iron-collapse/iron-collapse.html">
 <link rel="import" href="../bower_components/iron-icon/iron-icon.html">
+<link rel="import" href="../bower_components/paper-spinner/paper-spinner-lite.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-query.html">
 <link rel="import" href="helpers/my-hospital-hearing.html">
@@ -80,7 +81,9 @@
  -->
     <div class="card">
 
-      <div id="noneMessage">まだデータがありません。</div>
+      <div id="noneMessage">
+        <paper-spinner-lite active></paper-spinner-lite>
+      </div>
 
       <iron-collapse id="reloadButtonWrapper">
         <paper-button id="reloadButton" on-tap="loadHearings"><iron-icon icon="my-icons:cached"></iron-icon>新着予診票</paper-button>

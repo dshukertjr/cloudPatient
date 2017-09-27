@@ -41,8 +41,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       #inspectImgWrapper>div{
         background:red;
-        width:20px;
-        height:20px;
+        width:30px;
+        height:30px;
         border-radius:50%;
         box-shadow: 0 0 5px red;
         position:absolute;
@@ -370,8 +370,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         const dot = this.$.form.querySelector("#inspectImgWrapper>div")
         const offsetX = this.$.inspectImg.getBoundingClientRect().left
         const offsetY = this.$.inspectImg.getBoundingClientRect().top
-        const tapX = e.pageX - offsetX - 10 - scrollLeft
-        const tapY = e.pageY - offsetY - 10 - scrollTop
+        const tapX = e.pageX - offsetX - 15 - scrollLeft
+        const tapY = e.pageY - offsetY - 15 - scrollTop
         dot.style.left = tapX + "px"
         dot.style.top = tapY + "px"
 

@@ -9,6 +9,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 -->
 
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/paper-spinner/paper-spinner-lite.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-query.html">
 <link rel="import" href="helpers/user-helper.html">
@@ -37,7 +38,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     <div class="card">
 
-      <div id="noneMessage">まだデータがありません。</div>
+      <div id="noneMessage">
+        <paper-spinner-lite active></paper-spinner-lite>
+      </div>
 
       <template is="dom-repeat" items="[[users]]" sort="_computeSort">
         <user-helper params="[[item.$key]]"></user-helper>
@@ -61,6 +64,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       toggleNoneMessage(){
+        console.log("users", this.users)
         if(!this.users){
           this.$.noneMessage.hidden = true
         }else if(this.users.length > 0){
