@@ -124,11 +124,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           </div>
 
           <div>
-            <p>治療によって快適な身体を手に入れた後の目標、目的を教えてください。</p>
-            <paper-textarea label="ここに入力" required auto-validate id="afterHealthyBody"></paper-textarea>
-          </div>
-
-          <div>
             <paper-dropdown-menu required auto-validate id="howLong" label="どのくらい前から痛みますか？">
               <paper-listbox slot="dropdown-content">
                 <paper-item>1ヶ月以上前</paper-item>
@@ -158,6 +153,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           <div>
             <p>今までかかった病気（手術など）はございますか？</p>
             <paper-textarea label="ここに入力" required auto-validate id="anyDisease"></paper-textarea>
+          </div>
+
+          <div>
+            <p>治療によって快適な身体を手に入れた後の目標、目的を教えてください。</p>
+            <paper-textarea label="ここに入力" required auto-validate id="afterHealthyBody"></paper-textarea>
+          </div>
+
+          <div>
+            <p>担当施術者、術者指名が入る場合は記入してください。</p>
+            <paper-input label="ここに入力" id="designatedDoctor"></paper-input>
           </div>
 
           <div>
@@ -208,6 +213,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 <paper-item>希望しない</paper-item>
               </paper-listbox>
             </paper-dropdown-menu>
+          </div>
+
+          <div>
+            <p>要注意事項（クレーム、刺青の有無や肢体不自由など）</p>
+            <paper-textarea label="ここに入力" id="others"></paper-textarea>
           </div>
 
           <paper-button class="mainBtn" raised id="submitButton" on-tap="submit">提出</paper-button>
@@ -393,6 +403,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         const anyDisease = this.$.anyDisease.value
         const fastOrSlow = this.$.fastOrSlow.value
         const foundOutHow = this.$.foundOutHow.value
+        var others = this.$.others
+        if(!others) others = "なし"
+        var designatedDoctor = this.$.designatedDoctor
+        if(!designatedDoctor) designatedDoctor = "なし"
         var additionalFoundOutHow = this.$.additionalFoundOutHow.value
         if(!additionalFoundOutHow) additionalFoundOutHow = null
         var possiblyPregnant = this.$.possiblyPregnant.value
@@ -420,6 +434,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           anyDisease: anyDisease,
           fastOrSlow: fastOrSlow,
           foundOutHow: foundOutHow,
+          others: others,
+          designatedDoctor: designatedDoctor,
           additionalFoundOutHow: additionalFoundOutHow,
           possiblyPregnant: possiblyPregnant,
           introduceProfessional: introduceProfessional,

@@ -12,6 +12,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../../bower_components/iron-collapse/iron-collapse.html">
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../../bower_components/paper-textarea/paper-textarea.html">
 <link rel="import" href="../../bower_components/polymerfire/firebase-auth.html">
 <link rel="import" href="../../bower_components/polymerfire/firebase-document.html">
 <link rel="import" href="user-helper.html">
@@ -107,11 +108,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       </div>
 
       <div>
-        <p class="question">治療によって快適な身体を手に入れた後の目標、目的を教えてください。</p>
-        <p class="answer">[[hearingData.afterHealthyBody]]</p>
-      </div>
-
-      <div>
         <p class="question">どのくらい前から痛みますか？</p>
         <p class="answer">[[hearingData.howLong]]</p>
       </div>
@@ -129,6 +125,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       <div>
         <p class="question">今までかかった病気（手術など）はございますか？</p>
         <p class="answer">[[hearingData.anyDisease]]</p>
+      </div>
+
+      <div>
+        <p class="question">治療によって快適な身体を手に入れた後の目標、目的を教えてください。</p>
+        <p class="answer">[[hearingData.afterHealthyBody]]</p>
+      </div>
+
+      <div>
+        <p class="question">担当施術者、術者指名が入る場合は記入してください。</p>
+        <p class="answer">[[hearingData.designatedDoctor]]</p>
       </div>
 
       <div>
@@ -152,8 +158,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <p class="answer">[[hearingData.introduceProfessional]]</p>
       </div>
 
+      <div>
+        <p class="question">要注意事項（クレーム、刺青の有無や肢体不自由など）</p>
+        <p class="answer">[[hearingData.others]]</p>
+      </div>
+
+      <paper-textarea id="treatmentHospital" label="治療内容" value="{{hearingData.treatment}}"></paper-textarea>
 
       <paper-input id="priceHospital" label="お会計" value="{{hearingData.price}}"></paper-input>
+
+      <div id="treatmentPatient">
+        <div>治療内容</div>
+        <div>[[hearingData.treatment]]</div>
+      </div>
 
       <div id="pricePatient">
         <div>お会計</div>
@@ -196,6 +213,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       static get observers() {
         return [
           '_priceChanged(hearingData.price)'
+          '_treatmentChanged(hearingData.treatment)'
         ];
       }
 
@@ -209,6 +227,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         window.firebase.database().ref().child("users/" + this.hearingData.patientId + "/hearings/" + this.params + "/price").set(this.hearingData.price)
       }
 
+      _priceChanged(){
+        if(this.userType != "hospital"){
+          return
+        }
+        if(!this.hearingData.treatment){
+          return
+        }
+        window.firebase.database().ref().child("users/" + this.hearingData.patientId + "/hearings/" + this.params + "/treatment").set(this.hearingData.treatment)
+      }
+
       togglePrice(){
         if(this.userType == "patient"){
           // this.$.pricePatient.style.display = "flex"
@@ -218,6 +246,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           // this.$.pricePatient.style.display = "none"
           this.$.pricePatient.hidden = true
           this.$.priceHospital.hidden = false
+        }
+      }
+
+      toggleTreatment(){
+        if(this.userType == "patient"){
+          this.$.treatmentPatient.hidden = false
+          this.$.treatmentHospital.hidden = true
+        }else if(this.userType == "hospital"){
+          this.$.treatmentPatient.hidden = true
+          this.$.treatmentHospital.hidden = false
         }
       }
 
@@ -245,6 +283,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           this.displayName = this.hearingData.patientName
         }
         this.togglePrice()
+        this.toggleTreatment()
         this.toggleUserHelper()
         this.toggleReceiptLink()
       }
