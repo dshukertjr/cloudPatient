@@ -36,16 +36,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       #inspectImgWrapper{
         position:relative;
+        cursor:pointer;
       }
 
-      #redDot{
+      #inspectImgWrapper>div{
         background:red;
         width:20px;
         height:20px;
         border-radius:50%;
-        position:absolute;
         box-shadow: 0 0 5px red;
-        opacity:0;
+        position:absolute;
+        opacity:0.7;
+        z-index:10;
+        cursor:pointer;
       }
 
       #form>div{
@@ -119,7 +122,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <iron-collapse id="form">
           <p>痛みや不安のあるところをタップしてください。</p>
           <div id="inspectImgWrapper">
-            <div id="redDot"></div>
             <img id="inspectImg" on-click="placeRed" src="../images/assets/inspect.png" />
           </div>
 
@@ -357,30 +359,43 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       placeRed(e){
-        this.$.redDot.style.opacity = 0.7
+        // const redDot = this.$.inspectImgWrapper.createElement("div")
+        var doc = document.documentElement;
+        var scrollLeft = (window.pageXOffset || doc.scrollLeft) - (doc.clientLeft || 0);
+        var scrollTop = (window.pageYOffset || doc.scrollTop)  - (doc.clientTop || 0);
+        const redDot = document.createElement("div")
+        const wrapper = this.$.inspectImgWrapper
+        wrapper.prepend(redDot)
+
+        const dot = this.$.form.querySelector("#inspectImgWrapper>div")
         const offsetX = this.$.inspectImg.getBoundingClientRect().left
         const offsetY = this.$.inspectImg.getBoundingClientRect().top
-        const tapX = e.pageX - offsetX - 10
-        const tapY = e.pageY - offsetY - 10
-        this.$.redDot.style.left = tapX + "px"
-        this.$.redDot.style.top = tapY + "px"
-        this.redLeft = tapX + 10
-        this.redTop = tapY + 10
+        const tapX = e.pageX - offsetX - 10 - scrollLeft
+        const tapY = e.pageY - offsetY - 10 - scrollTop
+        dot.style.left = tapX + "px"
+        dot.style.top = tapY + "px"
+
+        const that = this
+        dot.addEventListener("click", function(){
+          wrapper.removeChild(dot)
+        })
       }
 
       findRedDotCenter(){
-        var left = parseInt(this.$.redDot.style.left) + 10
-        var top = parseInt(this.$.redDot.style.top) + 10
-        if(!left || !top){
-          return
-        }
-        const imgWidth = this.$.inspectImg.offsetWidth
-        const imgHeight = this.$.inspectImg.offsetHeight
-        left = left / imgWidth * 100
-        top = top / imgHeight * 100
-        const center = {
-          top: top,
-          left: left
+        const redDot = this.$.form.querySelectorAll("#inspectImgWrapper>div")
+        var center = []
+        const inspectImg = this.$.inspectImg
+        for(var i = 0; i < redDot.length; i++){
+          var left = parseInt(redDot[i].style.left) + 10
+          var top = parseInt(redDot[i].style.top) + 10
+          if(!left || !top){
+            return
+          }
+          const imgWidth = inspectImg.offsetWidth
+          const imgHeight = inspectImg.offsetHeight
+          left = left / imgWidth * 100
+          top = top / imgHeight * 100
+          center.push({left: left, top: top})
         }
         return center
       }
@@ -404,11 +419,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           this.openToast("患者さんの名前か病院の名前が未入力です。")
           return
         }
-        // const redDotCenter = this.findRedDotCenter()
-        const redDotCenter = {
-          left: this.redLeft,
-          top: this.redTop
-        }
+        const redDotCenter = this.findRedDotCenter()
         const afterHealthyBody = this.$.afterHealthyBody.value || null
         const howLong = this.$.howLong.value || null
         const happenedWhere = this.$.happenedWhere.value || null
@@ -451,10 +462,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           time: time
         }
 
-
         newHospitalRef.set(inputs)
         newPatientRef.set(inputs)
-
 
 
         //input the patient into hospital's patient list
