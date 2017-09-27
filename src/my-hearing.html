@@ -48,11 +48,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         opacity:0;
       }
 
-      .card>iron-collapse>div{
+      #form>div{
         margin:40px 0;
       }
 
-      .card>iron-collapse>div>p{
+      #form p{
         margin:0;
       }
 
@@ -100,7 +100,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       <iron-collapse id="afterLogin">
         <iron-collapse id="loginForm">
-            <p>患者としてログインしてください</p>
+            <p>まずは患者としてログインしてください。</p>
             <paper-input id="patientEmail" label="メールアドレス" required auto-validate></paper-input>
             <paper-input id="patientPassword" label="パスワード" minlength="6" error-message="6文字以上入力してください" type="password" required auto-validate></paper-input>
             <paper-button on-tap="loginPatient" class="mainBtn" raised>ログイン</paper-button>
@@ -150,6 +150,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             <p>何をしてて痛くなりましたか？</p>
             <paper-textarea label="ここに入力" required auto-validate id="fromWhat"></paper-textarea>
           </div>
+
           <div>
             <p>今までかかった病気（手術など）はございますか？</p>
             <paper-textarea label="ここに入力" required auto-validate id="anyDisease"></paper-textarea>
