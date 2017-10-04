@@ -237,7 +237,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         window.firebase.database().ref().child("users/" + this.hearingData.patientId + "/hearings/" + this.params + "/price").set(this.hearingData.price)
       }
 
-      _priceChanged(){
+      _treatmentChanged(){
         if(this.userType != "hospital"){
           return
         }
@@ -352,6 +352,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       openWrapper(){
         const that = this
+        if(!this.hearingData) return
         if(!this.hearingData.read){
           this.$.hearingDataDocument.ref.child("read").set("true", function (err) {
             that.determineIfNew()
