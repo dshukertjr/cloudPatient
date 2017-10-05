@@ -232,7 +232,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         return [
           '_priceChanged(hearingData.price)',
           '_treatmentChanged(hearingData.treatment)',
-          '_treatmentChanged(hearingData.comment)',
+          '_commentChanged(hearingData.comment)',
         ]
       }
 
@@ -256,7 +256,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         window.firebase.database().ref().child("users/" + this.hearingData.patientId + "/hearings/" + this.params + "/treatment").set(this.hearingData.treatment)
       }
 
-      _treatmentChanged(){
+      _commentChanged(){
         if(this.userType != "hospital"){
           return
         }
@@ -288,6 +288,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
       }
 
+      toggleComment(){
+        if(this.userType == "patient"){
+          this.$.commentPatient.hidden = false
+          this.$.commentHospital.hidden = true
+        }else if(this.userType == "hospital"){
+          this.$.commentPatient.hidden = true
+          this.$.commentHospital.hidden = false
+        }
+      }
+
       toggleUserHelper(){
         if(this.userType == "patient"){
           this.$.userHelper.hidden = true
@@ -307,6 +317,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       changeDisplayName(){
         this.togglePrice()
         this.toggleTreatment()
+        this.toggleComment()
         this.toggleUserHelper()
         this.toggleReceiptLink()
         // console.log("display name change", this.hearingData)
