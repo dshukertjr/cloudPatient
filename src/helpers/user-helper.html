@@ -80,7 +80,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       
       <div class="categoryWrapper patient">
         <div class="label">電話番号</div>
-        <div calss="property">[[userData.patientPhoneNumber]]</div>
+        <div calss="property"><a href="tel:[[intPhoneNumber]]">[[userData.patientPhoneNumber]]</a></div>
       </div>
       
       <div class="categoryWrapper patient">
@@ -118,8 +118,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </iron-collapse>
 
 
-
-
   </template>
 
   <script>
@@ -138,12 +136,29 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           setDisplayName: String,
           userData: Object,
           admin: Object,
+          intPhoneNumber: {
+            type: String,
+            computed: '_phoneChanged(userData.patientPhoneNumber)'
+          },
           displayName: {
             type: String,
             value: "読み込み中...",
             computed: 'changeDisplayName(userData)'
           },
         }
+      }
+
+      _phoneChanged(){
+        if(!this.userData) return
+        if(!this.userData.patientPhoneNumber) return
+        // replace all leading non-digits with nothing
+        var numberPattern = /\d+/g;
+        var integers = this.userData.patientPhoneNumber.match( numberPattern )
+        var intPhoneNumber = ""
+        for(var i=0; i<integers.length; i++){
+          intPhoneNumber += integers[i]
+        }
+        return intPhoneNumber
       }
 
       changeDisplayName(){

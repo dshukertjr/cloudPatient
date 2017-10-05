@@ -229,7 +229,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         <iron-collapse id="afterMessage">
           <div>
-            問診票のご記入ありがとうございました。係りの者から呼ばれるまでお待ちください。
+            予診票のご記入ありがとうございました。係りの者から呼ばれるまでお待ちください。
           </div>
         </iron-collapse>
       </iron-collapse>
@@ -429,7 +429,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         const foundOutHow = this.$.foundOutHow.value || null
         const others = this.$.others.value || "なし"
         const designatedDoctor = this.$.designatedDoctor.value || "なし"
-        const additionalFoundOutHow = this.$.additionalFoundOutHow.value || "なし"
+        const additionalFoundOutHow = this.$.additionalFoundOutHow.value || null
+        const additionalFoundOutHowQ = this.$.additionalFoundOutHow.label || null
         const possiblyPregnant = this.$.possiblyPregnant.value || null
         const introduceProfessional = this.$.introduceProfessional.value || null
         const time = new Date().getTime()
@@ -457,6 +458,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           others: others,
           designatedDoctor: designatedDoctor,
           additionalFoundOutHow: additionalFoundOutHow,
+          additionalFoundOutHowQ: additionalFoundOutHowQ,
           possiblyPregnant: possiblyPregnant,
           introduceProfessional: introduceProfessional,
           time: time

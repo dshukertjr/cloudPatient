@@ -155,7 +155,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       <div>
         <p class="question">どちらで当院をお知りになりましたか？</p>
         <p class="answer">[[hearingData.foundOutHow]]</p>
-        <p class="answer" hidden="![[hearingData.additionalFoundOutHow]]">[[hearingData.additionalFoundOutHow]]</p>
+        <p class="question" hidden$="[[!hearingData.additionalFoundOutHow]]">[[hearingData.additionalFoundOutHowQ]]</p>
+        <p class="answer" hidden$="[[!hearingData.additionalFoundOutHow]]">[[hearingData.additionalFoundOutHow]]</p>
       </div>
 
       <div>
@@ -175,11 +176,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       <paper-textarea id="treatmentHospital" label="治療内容" value="{{hearingData.treatment}}"></paper-textarea>
 
+      <paper-textarea id="commentHospital" label="患者様へのコメント" value="{{hearingData.comment}}"></paper-textarea>
+
       <paper-input id="priceHospital" label="お会計" value="{{hearingData.price}}"></paper-input>
 
       <div id="treatmentPatient">
         <div>治療内容</div>
         <div>[[hearingData.treatment]]</div>
+      </div>
+
+      <div id="commentPatient">
+        <div>施術者からのコメント</div>
+        <div>[[hearingData.comment]]</div>
       </div>
 
       <div id="pricePatient">
@@ -223,8 +231,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       static get observers() {
         return [
           '_priceChanged(hearingData.price)',
-          '_treatmentChanged(hearingData.treatment)'
-        ];
+          '_treatmentChanged(hearingData.treatment)',
+          '_treatmentChanged(hearingData.comment)',
+        ]
       }
 
       _priceChanged(){
@@ -245,6 +254,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           return
         }
         window.firebase.database().ref().child("users/" + this.hearingData.patientId + "/hearings/" + this.params + "/treatment").set(this.hearingData.treatment)
+      }
+
+      _treatmentChanged(){
+        if(this.userType != "hospital"){
+          return
+        }
+        if(!this.hearingData.comment){
+          return
+        }
+        window.firebase.database().ref().child("users/" + this.hearingData.patientId + "/hearings/" + this.params + "/comment").set(this.hearingData.comment)
       }
 
       togglePrice(){
