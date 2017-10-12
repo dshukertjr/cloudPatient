@@ -52,7 +52,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       .question{
-        font-weight:200;
+        font-weight:100;
       }
 
       .answer{
@@ -315,18 +315,22 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       changeDisplayName(){
+        console.log("hearing data", this.hearingData)
         this.togglePrice()
         this.toggleTreatment()
         this.toggleComment()
         this.toggleUserHelper()
         this.toggleReceiptLink()
         // console.log("display name change", this.hearingData)
-        if(!this.hearingData) return
+        if(!this.hearingData){
+          console.log("no hearing data")
+          return
+        }
         var displayName = ""
         if(this.userType == "patient"){
-          displayName = this.hearingData.hospitalName
+          displayName = this.hearingData.hospitalName + (this.hearingData.first?" 初診":"")
         }else{
-          displayName = this.hearingData.patientName
+          displayName = this.hearingData.patientName + (this.hearingData.first?" 初診":"")
         }
         if(displayName){
           this.displayName = displayName
@@ -334,6 +338,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       placeRedDot(){
+        this.changeDisplayName()
+        this.convertToDate()
+        this.determineIfNew()
         if(!this.hearingData){
           return
         }
@@ -365,9 +372,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           })
         }  
         //call change display name when hearing Data changed
-        this.changeDisplayName()
-        this.convertToDate()
-        this.determineIfNew()
       }
 
       determineIfNew(){
@@ -397,7 +401,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         // console.log(this.hearingData)
         if(!this.hearingData.time) return
         const d = new Date(this.hearingData.time)
-        this.displayDate =  d.getFullYear() +"/" + (d.getMonth()+1) + "/" + d.getDate() + " " + d.getHours() + ":" + d.getMinutes()
+        this.displayDate =  d.getFullYear() +"/" + (d.getMonth()+1) + "/" + d.getDate() + " " + d.getHours() + ":" + (d.getMinutes() < 10?"0":"") + d.getMinutes()
       }
 
     }

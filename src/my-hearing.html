@@ -19,6 +19,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/paper-spinner/paper-spinner-lite.html">
 <link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-query.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-document.html">
 <link rel="import" href="shared-styles.html">
 
@@ -76,6 +77,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         margin-top:16px;
       }
 
+      #checkIn>paper-button{
+        display:block;
+        width:100%;
+        text-align:center;
+        margin:40px auto;
+      }
+
+      #fillOutOpen{
+        margin-top:0;
+      }
+
     </style>
 
     <firebase-auth
@@ -94,6 +106,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       path="users/[[user.uid]]/profile"
       data="{{patientData}}">
     </firebase-document>
+
+    <firebase-query
+        id="repeatCheckQuery"
+        path="/users/[[user.uid]]/hearings"
+        order-by-child="hospitalId"
+        equal-to="[[paramas]]"
+        data="{{lastHearing}}">
+    </firebase-query>
 
     <div class="card">
 
@@ -115,115 +135,130 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         <iron-collapse id="forgetPassword">
           <p>パスワードリセットのためのリンクを登録されているメールアドレスに送信いたします。</p>
-          <paper-input id="forgetdPasswordEmail" label="メールアドレス" required auto-validate></paper-input>
-          <paper-button on-tap="forgetPassword" raised class="mainBtn">送信</paper-button>
+          <paper-input on-tap="_checkIn" id="forgetdPasswordEmail" label="メールアドレス" required auto-validate></paper-input>
+          <paper-button raised on-tap="forgetPassword" raised class="mainBtn">送信</paper-button>
         </iron-collapse>
 
         <iron-collapse id="form">
-          <p>痛みや不安のあるところをタップしてください。</p>
-          <div id="inspectImgWrapper">
-            <img id="inspectImg" on-click="placeRed" src="../images/assets/inspect.png" />
-          </div>
 
-          <div>
-            <paper-dropdown-menu required auto-validate id="howLong" label="どのくらい前から痛みますか？">
-              <paper-listbox slot="dropdown-content">
-                <paper-item>1ヶ月以上前</paper-item>
-                <paper-item>2週間前</paper-item>
-                <paper-item>1週間前</paper-item>
-                <paper-item>昨日</paper-item>
-              </paper-listbox>
-            </paper-dropdown-menu>
-          </div>
+          <iron-collapse id="checkIn">
+            <paper-button raised class="mainBtn" on-tap="_checkIn">再診なのでチェックインする</paper-button>
 
-          <div>
-            <paper-dropdown-menu required id="happenedWhere" label="どこでそのようになりましたか？">
-              <paper-listbox slot="dropdown-content">
-                <paper-item>自宅</paper-item>
-                <paper-item>会社</paper-item>
-                <paper-item>学校</paper-item>
-                <paper-item>路上</paper-item>
-                <paper-item>その他</paper-item>
-              </paper-listbox>
-            </paper-dropdown-menu>
-          </div>
+            <paper-button raised id="fillOutOpen" on-tap="_fillOutOpenTapped">初診なので予診票を記入する</paper-button>
 
-          <div>
-            <p>何をしてて痛くなりましたか？</p>
-            <paper-textarea label="ここに入力" required auto-validate id="fromWhat"></paper-textarea>
-          </div>
+          </iron-collapse>
 
-          <div>
-            <p>今までかかった病気（手術など）はございますか？</p>
-            <paper-textarea label="ここに入力" required auto-validate id="anyDisease"></paper-textarea>
-          </div>
+          <iron-collapse id="afterCheckIn">
+            <div>チェックインが完了しました。係りの者から呼ばれるまでお待ちください。</div>
+          </iron-collapse>
 
-          <div>
-            <p>治療によって快適な身体を手に入れた後の目標、目的を教えてください。</p>
-            <paper-textarea label="ここに入力" required auto-validate id="afterHealthyBody"></paper-textarea>
-          </div>
+          <iron-collapse id="fillOutForm">
+            <p>痛みや不安のあるところをタップしてください。</p>
+            <div id="inspectImgWrapper">
+              <img id="inspectImg" on-click="placeRed" src="../images/assets/inspect.png" />
+            </div>
 
-          <div>
-            <p>担当施術者、術者指名が入る場合は記入してください。</p>
-            <paper-input label="ここに入力" id="designatedDoctor"></paper-input>
-          </div>
+            <div>
+              <paper-dropdown-menu required auto-validate id="howLong" label="どのくらい前から痛みますか？">
+                <paper-listbox slot="dropdown-content">
+                  <paper-item>1ヶ月以上前</paper-item>
+                  <paper-item>2週間前</paper-item>
+                  <paper-item>1週間前</paper-item>
+                  <paper-item>昨日</paper-item>
+                </paper-listbox>
+              </paper-dropdown-menu>
+            </div>
 
-          <div>
-            <p>当院では通院時間の取れない方、痛みが取れず困っている方、より早く痛みから逃れたい方のために、ご相談後、特別治療を導入しております。<br />通常の保険治療に比べて早く治すことが可能です。ご希望の方を選択してください。</p>
-            <paper-dropdown-menu id="fastOrSlow" label="選択肢より選んでください。">
-              <paper-listbox slot="dropdown-content">
-                <paper-item>短い期間で痛みを早くなおしたい</paper-item>
-                <paper-item>長い期間をかけてゆっくり治療をおこないたい</paper-item>
-              </paper-listbox>
-            </paper-dropdown-menu>
-          </div>
+            <div>
+              <paper-dropdown-menu required id="happenedWhere" label="どこでそのようになりましたか？">
+                <paper-listbox slot="dropdown-content">
+                  <paper-item>自宅</paper-item>
+                  <paper-item>会社</paper-item>
+                  <paper-item>学校</paper-item>
+                  <paper-item>路上</paper-item>
+                  <paper-item>その他</paper-item>
+                </paper-listbox>
+              </paper-dropdown-menu>
+            </div>
 
-          <div>
-          <p>どちらで当院をお知りになりましたか？</p>
-            <paper-dropdown-menu required id="foundOutHow" on-value-changed="additionalCheck" label="選択肢より選んでください。">
-              <paper-listbox slot="dropdown-content">
-                <paper-item>紹介</paper-item>
-                <paper-item>近いから</paper-item>
-                <paper-item>過去に受診</paper-item>
-                <paper-item>エキテン</paper-item>
-                <paper-item>街ネタ</paper-item>
-                <paper-item>当院ブログ</paper-item>
-                <paper-item>タウンページ</paper-item>
-                <paper-item>店頭看板</paper-item>
-                <paper-item>チラシ・小冊子</paper-item>
-                <paper-item>試合会場で知った</paper-item>
-                <paper-item>当院ホームページ</paper-item>
-              </paper-listbox>
-            </paper-dropdown-menu>
-            <paper-textarea hidden="true" id="additionalFoundOutHow"></paper-textarea>
-          </div>
+            <div>
+              <p>何をしてて痛くなりましたか？</p>
+              <paper-textarea label="ここに入力" required auto-validate id="fromWhat"></paper-textarea>
+            </div>
 
-          <div>
-            <p>※女性の方のみにお聞きします。今、妊娠またはその可能性はありますか？</p>
-            <paper-dropdown-menu required id="possiblyPregnant" label="選択肢より選んでください。">
-              <paper-listbox slot="dropdown-content">
-                <paper-item>ない</paper-item>
-                <paper-item>ある</paper-item>
-              </paper-listbox>
-            </paper-dropdown-menu>
-          </div>
+            <div>
+              <p>今までかかった病気（手術など）はございますか？</p>
+              <paper-textarea label="ここに入力" required auto-validate id="anyDisease"></paper-textarea>
+            </div>
 
-          <div>
-            <p>症状によっては、総合病院・専門病院への紹介を希望されますか？</p>
-            <paper-dropdown-menu  required id="introduceProfessional" label="選択肢より選んでください。">
-              <paper-listbox slot="dropdown-content">
-                <paper-item>希望する</paper-item>
-                <paper-item>希望しない</paper-item>
-              </paper-listbox>
-            </paper-dropdown-menu>
-          </div>
+            <div>
+              <p>治療によって快適な身体を手に入れた後の目標、目的を教えてください。</p>
+              <paper-textarea label="ここに入力" required auto-validate id="afterHealthyBody"></paper-textarea>
+            </div>
 
-          <div>
-            <p>要注意事項（クレーム、刺青の有無や肢体不自由など）</p>
-            <paper-textarea label="ここに入力" id="others"></paper-textarea>
-          </div>
+            <div>
+              <p>担当施術者、術者指名が入る場合は記入してください。</p>
+              <paper-input label="ここに入力" id="designatedDoctor"></paper-input>
+            </div>
 
-          <paper-button class="mainBtn" raised id="submitButton" on-tap="submit">提出</paper-button>
+            <div>
+              <p>当院では通院時間の取れない方、痛みが取れず困っている方、より早く痛みから逃れたい方のために、ご相談後、特別治療を導入しております。<br />通常の保険治療に比べて早く治すことが可能です。ご希望の方を選択してください。</p>
+              <paper-dropdown-menu id="fastOrSlow" label="選択肢より選んでください。">
+                <paper-listbox slot="dropdown-content">
+                  <paper-item>短い期間で痛みを早くなおしたい</paper-item>
+                  <paper-item>長い期間をかけてゆっくり治療をおこないたい</paper-item>
+                </paper-listbox>
+              </paper-dropdown-menu>
+            </div>
+
+            <div>
+            <p>どちらで当院をお知りになりましたか？</p>
+              <paper-dropdown-menu required id="foundOutHow" on-value-changed="additionalCheck" label="選択肢より選んでください。">
+                <paper-listbox slot="dropdown-content">
+                  <paper-item>紹介</paper-item>
+                  <paper-item>近いから</paper-item>
+                  <paper-item>過去に受診</paper-item>
+                  <paper-item>エキテン</paper-item>
+                  <paper-item>街ネタ</paper-item>
+                  <paper-item>当院ブログ</paper-item>
+                  <paper-item>タウンページ</paper-item>
+                  <paper-item>店頭看板</paper-item>
+                  <paper-item>チラシ・小冊子</paper-item>
+                  <paper-item>試合会場で知った</paper-item>
+                  <paper-item>当院ホームページ</paper-item>
+                </paper-listbox>
+              </paper-dropdown-menu>
+              <paper-textarea hidden="true" id="additionalFoundOutHow"></paper-textarea>
+            </div>
+
+            <div>
+              <p>※女性の方のみにお聞きします。今、妊娠またはその可能性はありますか？</p>
+              <paper-dropdown-menu required id="possiblyPregnant" label="選択肢より選んでください。">
+                <paper-listbox slot="dropdown-content">
+                  <paper-item>ない</paper-item>
+                  <paper-item>ある</paper-item>
+                </paper-listbox>
+              </paper-dropdown-menu>
+            </div>
+
+            <div>
+              <p>症状によっては、総合病院・専門病院への紹介を希望されますか？</p>
+              <paper-dropdown-menu  required id="introduceProfessional" label="選択肢より選んでください。">
+                <paper-listbox slot="dropdown-content">
+                  <paper-item>希望する</paper-item>
+                  <paper-item>希望しない</paper-item>
+                </paper-listbox>
+              </paper-dropdown-menu>
+            </div>
+
+            <div>
+              <p>要注意事項（クレーム、刺青の有無や肢体不自由など）</p>
+              <paper-textarea label="ここに入力" id="others"></paper-textarea>
+            </div>
+
+            <paper-button class="mainBtn" raised id="submitButton" on-tap="submit">提出</paper-button>
+
+          </iron-collapse>
 
         </iron-collapse>
 
@@ -254,6 +289,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           },
           patientData: Object,
           hospitalData: Object,
+          lastHearing: {
+            type: Object,
+            observer: '_lastHearingChanged'
+          },
           statusKnown: {
             type: Object,
             observer: 'statusKnownChanged'
@@ -261,6 +300,128 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           redLeft: Number,
           redTop: Number,
         }
+      }
+
+      _lastHearingChanged(){
+        const lastHearing = this.lastHearing[this.lastHearing.length - 1]
+        if(!lastHearing){
+          this.$.checkIn.hide()
+          this.$.fillOutForm.show()
+          return
+        }
+        if(!lastHearing.time){
+          this.$.checkIn.hide()
+          this.$.fillOutForm.show()
+          return
+        }
+        const now = new Date().getTime()
+        const monthBefore = now - 1000 * 60 * 60 * 24 * 30
+        //if the patient came within a month
+        if(lastHearing.time > monthBefore){
+          this.$.checkIn.show()
+          this.$.fillOutForm.hide()
+        }else{
+          this.$.checkIn.hide()
+          this.$.fillOutForm.show()
+        }
+      }
+
+      _checkIn(){
+        console.log("check in called")
+        if(!this.params){
+          this.openToast("QRコードが正しく読み込めていませんでした。")
+          return
+        }
+        if(!this.user){
+          this.openToast("ログインされていません。")
+          return
+        }
+        if(!this.patientData || !this.hospitalData){
+          this.openToast("患者データ、治療院データが入力されていません。")
+          return
+        }
+        const patientName = this.patientData.patientName
+        const hospitalName = this.hospitalData.hospitalName
+        if(!patientName || !hospitalName){
+          this.openToast("患者さんの名前か病院の名前が未入力です。")
+          return
+        }
+        //get the data from past hearings
+        var pastHearings = this.lastHearing
+        var pastHearing = {}
+        pastHearings = pastHearings.reverse()
+        for(var i=0; i<pastHearings.length; i++){
+          if(pastHearings[i].first){
+            pastHearing = pastHearings[i]
+            break
+          }
+        }
+        console.log("past hearing", pastHearing)
+
+        const redDotCenter = pastHearing.readDotCenter || null
+        const afterHealthyBody = pastHearing.afterHealthyBody || null
+        const howLong = pastHearing.howLong || null
+        const happenedWhere = pastHearing.happenedWhere || null
+        const fromWhat = pastHearing.fromWhat || null
+        const anyDisease = pastHearing.anyDisease || null
+        const fastOrSlow = pastHearing.fastOrSlow || null
+        const foundOutHow = pastHearing.foundOutHow || null
+        const others = pastHearing.others || null
+        const designatedDoctor = pastHearing.designatedDoctor || null
+        const additionalFoundOutHow = pastHearing.additionalFoundOutHow || null
+        const additionalFoundOutHowQ = pastHearing.additionalFoundOutHowQ || null
+        const possiblyPregnant = pastHearing.possiblyPregnant || null
+        const introduceProfessional = pastHearing.introduceProfessional || null
+        const time = new Date().getTime()
+
+
+        //input it into the hospitals database
+        const newHospitalRef = window.firebase.database().ref().child("users/" + this.params + "/hearings/").push()
+
+        // input it into the patients database
+        const newPatientRef = window.firebase.database().ref().child("users/" + this.user.uid + "/hearings/" + newHospitalRef.key)
+
+        const inputs = {
+          patientId: this.user.uid,
+          hospitalId: this.params,
+          patientName: patientName,
+          hospitalName: hospitalName,
+          redDotCenter: redDotCenter,
+          afterHealthyBody: afterHealthyBody,
+          howLong: howLong,
+          happenedWhere: happenedWhere,
+          fromWhat: fromWhat,
+          anyDisease: anyDisease,
+          fastOrSlow: fastOrSlow,
+          foundOutHow: foundOutHow,
+          others: others,
+          designatedDoctor: designatedDoctor,
+          additionalFoundOutHow: additionalFoundOutHow,
+          additionalFoundOutHowQ: additionalFoundOutHowQ,
+          possiblyPregnant: possiblyPregnant,
+          introduceProfessional: introduceProfessional,
+          time: time
+        }
+
+        console.log("input", inputs)
+        return
+
+        newHospitalRef.set(inputs)
+        newPatientRef.set(inputs)
+
+
+        //input the patient into hospital's patient list
+        window.firebase.database().ref().child("users/" + this.params + "/users/" + this.user.uid).set(time)
+
+        //input the hospital into patient's hospital list
+        window.firebase.database().ref().child("users/" + this.user.uid + "/users/" + this.params).set(time)
+        this.$.checkIn.hide()
+        this.$.afterCheckIn.show()
+      }
+
+      _fillOutOpenTapped(){
+        this.$.checkIn.hide()
+        this.$.fillOutForm.show()
       }
 
       statusKnownChanged(){
@@ -461,6 +622,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           additionalFoundOutHowQ: additionalFoundOutHowQ,
           possiblyPregnant: possiblyPregnant,
           introduceProfessional: introduceProfessional,
+          firstVisit: "true",
           time: time
         }
 
