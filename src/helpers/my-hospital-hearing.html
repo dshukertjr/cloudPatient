@@ -323,7 +323,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this.toggleReceiptLink()
         // console.log("display name change", this.hearingData)
         if(!this.hearingData){
-          console.log("no hearing data")
+          // console.log("no hearing data")
           return
         }
         var displayName = ""
@@ -332,7 +332,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }else{
           displayName = this.hearingData.patientName + (this.hearingData.first?" 初診":"")
         }
-        if(displayName){
+        if(displayName && displayName != "undefined"){
           this.displayName = displayName
         }
       }
@@ -376,11 +376,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       determineIfNew(){
         if(!this.hearingData) return
-        console.log("read", this.hearingData.read)
-        if(this.hearingData.read){
-          this.$.openButton.style.background = null
-        }else{
+        if(this.hearingData.read === null){
           this.$.openButton.style.background = "#E3F2FD"
+        }else{
+          this.$.openButton.style.background = null
         }
       }
 
