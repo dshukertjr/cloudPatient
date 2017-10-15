@@ -52,11 +52,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         cursor:pointer;
       }
 
-      #form>div{
+      #fillOutForm>div{
         margin:40px 0;
       }
 
-      #form p{
+      #fillOutForm p{
         margin:0;
       }
 
@@ -351,7 +351,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         var pastHearing = {}
         pastHearings = pastHearings.reverse()
         for(var i=0; i<pastHearings.length; i++){
-          if(pastHearings[i].first){
+          console.log("each past hearing", pastHearings[i])
+          if(pastHearings[i].firstVisit){
             pastHearing = pastHearings[i]
             break
           }
@@ -402,6 +403,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           introduceProfessional: introduceProfessional,
           time: time
         }
+
+        console.log("inputs", inputs)
 
 
         newHospitalRef.set(inputs)

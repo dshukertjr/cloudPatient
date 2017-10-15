@@ -376,10 +376,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       determineIfNew(){
         if(!this.hearingData) return
-        if(this.hearingData.read === null){
-          this.$.openButton.style.background = "#E3F2FD"
-        }else{
+        if(this.hearingData.read){
           this.$.openButton.style.background = null
+        }else{
+          this.$.openButton.style.background = "#E3F2FD"
         }
       }
 
