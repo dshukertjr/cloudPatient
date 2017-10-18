@@ -82,7 +82,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         </iron-collapse>
 
         <iron-collapse id="patientLogin">
-          <paper-input id="patientEmail" label="メールアドレス" required auto-validate></paper-input>
+          <paper-input id="patientEmail" type="email" label="メールアドレス" required auto-validate></paper-input>
           <paper-input id="patientPassword" label="パスワード" minlength="6" error-message="6文字以上入力してください" type="password" required auto-validate></paper-input>
           <paper-button on-tap="loginPatient" class="mainBtn" raised>ログイン</paper-button>
           <paper-button on-tap="createPatient">新規登録</paper-button>
@@ -111,7 +111,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         </iron-collapse>
     
         <iron-collapse id="hospitalLogin">
-          <paper-input id="hospitalEmail" label="メールアドレス" required auto-validate></paper-input>
+          <paper-input id="hospitalEmail" type="email" label="メールアドレス" required auto-validate></paper-input>
           <paper-input id="hospitalPassword" label="パスワード" type="password" minlength="6" error-message="6文字以上入力してください" required auto-validate></paper-input>
           <paper-button on-tap="loginHospital" class="mainBtn" raised>ログイン</paper-button>
           <paper-button on-tap="createHospital">新規登録</paper-button>

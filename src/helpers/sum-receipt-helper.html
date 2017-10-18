@@ -1,0 +1,154 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../../bower_components/iron-collapse/iron-collapse.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/polymerfire/firebase-auth.html">
+<link rel="import" href="../../bower_components/polymerfire/firebase-query.html">
+<link rel="import" href="../../bower_components/polymerfire/firebase-document.html">
+<link rel="import" href="../shared-styles.html">
+
+<dom-module id="sum-receipt-helper">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+        border-bottom:1px solid #ccc;
+      }
+
+      #pricePatient{
+        display:flex;
+        justify-content: space-between;
+      }
+
+      .hospitalInfo{
+        text-align:right;
+      }
+
+      #date{
+        font-size:12px;
+        font-weight:200;
+      }
+
+      #price{
+        font-size:24px;
+        font-weight:700;
+        margin: 8px 0 12px 0;
+      }
+
+      #closeButton{
+        margin-top:20px;
+      }
+    </style>
+
+    <firebase-auth
+    id="auth"
+    user="{{user}}"
+    on-error="handleError">
+    </firebase-auth>
+
+    <firebase-query
+      id="query"
+      path="[[path]]/[[year]]"
+      data="{{receiptData}}">
+    </firebase-query>
+
+    <firebase-document
+      path="users/[[hospitalId]]/profile"
+      data="{{hospitalData}}">
+    </firebase-document>
+
+    <paper-button class="leftButton wideButton" on-tap="openWrapper"><div class="nameWrapper">[[year]]年</div></paper-button>
+
+    <iron-collapse id="wrapper">
+
+      <div>
+        <h2>領収書</h2>
+        <div id="date">[[year]]年</div>
+        <div id="patientName">[[displayName]] 様</div>
+        <div id="price">¥ [[formattedPrice]]</div>
+        <div class="hospitalInfo" id="hospitalName">[[hospitalData.hospitalName]]</div>
+        <div class="hospitalInfo" id="hospitalAddress">[[hospitalData.hospitalAddress]]</div>
+        <div class="hospitalInfo" id="hospitalPhone">Tel: [[hospitalData.hospitalPhoneNumber]]</div>
+      </div>
+
+
+      <paper-button id="closeButton" raised on-tap="openWrapper" class="wideButton">[[year]]年の領収書を閉じる</paper-button>
+      
+    </iron-collapse>
+
+
+  </template>
+
+  <script>
+    class SumReceiptHelper extends Polymer.Element {
+      static get is() { return 'sum-receipt-helper'; }
+
+      static get properties() {
+        return {
+          year: String,
+          user: Object,
+          hospitalData: Object,
+          path: Object,
+          displayName: {
+            type: String,
+            computed: 'changeName(receiptData)'
+          },
+          sum: Number,
+          hospitalId: Object,
+          receiptData: {
+            type: Object,
+            observer: '_sumUp'
+          },
+          formattedPrice: Object,
+        }
+      }
+
+      changeName(){
+        if(!this.receiptData) return
+        if(!this.receiptData[0]) return
+        return this.receiptData[0].patientName
+      }
+
+      formatPrice(){
+        var nStr = this.sum
+         nStr += ''
+         var x = nStr.split('.')
+         var x1 = x[0]
+         var x2 = x.length > 1 ? '.' + x[1] : ''
+         var rgx = /(\d+)(\d{3})/
+         while (rgx.test(x1)) {
+          x1 = x1.replace(rgx, '$1' + ',' + '$2')
+         }
+         this.formattedPrice = x1 + x2
+      }
+
+
+      _sumUp(){
+        if(!this.receiptData) return
+        const data = this.receiptData
+        var sum = 0
+        for(var i = 0; i < data.length; i++){
+          sum += parseInt(data[i].price)
+        }
+        this.sum = sum
+        this.formatPrice()
+      }
+
+      openWrapper(){
+        this.$.wrapper.toggle()
+      }
+
+    }
+
+    window.customElements.define(SumReceiptHelper.is, SumReceiptHelper);
+  </script>
+</dom-module>

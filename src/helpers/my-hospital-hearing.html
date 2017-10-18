@@ -243,7 +243,22 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         if(!this.hearingData.price){
           return
         }
+        //input it into patient's database
         window.firebase.database().ref().child("users/" + this.hearingData.patientId + "/hearings/" + this.params + "/price").set(this.hearingData.price)
+
+        //input it into patient's acumulated database
+        if(this.hearingData.time != null){
+          var d = new Date(this.hearingData.time)
+        }else{
+          var d = new Date()
+        }
+        var year = d.getFullYear() + ""
+        year = "2018"
+        const input = {
+          price: this.hearingData.price,
+          patientName: this.hearingData.patientName,
+        }
+        window.firebase.database().ref().child("users/" + this.hearingData.patientId + "/receipts/" + this.hearingData.hospitalId + "/" + year + "/" + this.params).set(input)
       }
 
       _treatmentChanged(){
@@ -401,7 +416,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         if(!this.hearingData.time) return
         const now = new Date()
         const d = new Date(this.hearingData.time)
-        this.displayDate =  (now.getFullYear == d.getFullYear?"":d.getFullYear() +"/") + (d.getMonth()+1) + "/" + d.getDate() + " " + d.getHours() + ":" + (d.getMinutes() < 10?"0":"") + d.getMinutes()
+        this.displayDate =  (now.getFullYear() == d.getFullYear()?"":d.getFullYear() +"/") + (d.getMonth()+1) + "/" + d.getDate() + " " + d.getHours() + ":" + (d.getMinutes() < 10?"0":"") + d.getMinutes()
       }
 
     }

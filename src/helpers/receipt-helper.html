@@ -1,0 +1,134 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../../bower_components/iron-collapse/iron-collapse.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/polymerfire/firebase-auth.html">
+<link rel="import" href="../../bower_components/polymerfire/firebase-query.html">
+<link rel="import" href="../../bower_components/polymerfire/firebase-document.html">
+<link rel="import" href="sum-receipt-helper.html">
+<link rel="import" href="../shared-styles.html">
+
+<dom-module id="receipt-helper">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+        border-bottom:1px solid #ccc;
+      }
+
+      #closeButton{
+        margin-top:20px;
+      }
+    </style>
+
+    <firebase-auth
+    id="auth"
+    user="{{user}}"
+    on-error="handleError">
+    </firebase-auth>
+
+    <firebase-document
+      path="users/[[user.uid]]/receipts/[[params]]"
+      data="{{yearData}}">
+    </firebase-document>
+
+    <firebase-document
+      path="users/[[params]]/type"
+      data="{{userType}}">
+    </firebase-document>
+
+    <firebase-document
+      path="users/[[params]]/profile"
+      data="{{hospitalData}}">
+    </firebase-document>
+
+    <paper-button class="leftButton wideButton" on-tap="openWrapper"><div class="nameWrapper">[[displayName]]</div></paper-button>
+
+    <iron-collapse id="wrapper">
+
+      <template is="dom-repeat" items="[[years]]" sort="_computeSort">
+        <sum-receipt-helper year="[[item.$key]]" hospital-id="[[params]]" path="users/[[user.uid]]/receipts/[[params]]"></sum-receipt-helper>
+      </template>
+
+
+      <paper-button id="closeButton" raised on-tap="openWrapper" class="wideButton">[[displayName]]を閉じる</paper-button>
+      
+    </iron-collapse>
+
+
+  </template>
+
+  <script>
+    class ReceiptHelper extends Polymer.Element {
+      static get is() { return 'receipt-helper'; }
+
+      static get properties() {
+        return {
+          //hospital id in this case
+          params: String,
+          yearData: {
+            type: Object,
+            observer: 'convertToArray'
+          },
+          years: Object,
+          user: Object,
+          displayName: {
+            type: String,
+            value: "読み込み中...",
+            computed: 'changeDisplayName(hospitalData)'
+          },
+          hospitalData: Object,
+        }
+      }
+
+      convertToArray(){
+        // console.log("convertToArray")
+        if(!this.yearData) return
+        var years = []
+        const yearData = this.yearData
+        for(var year in yearData) { 
+          var attr = yearData[year]
+          // console.log("attr", attr)
+          // console.log("year", year)
+          years.push({$key: year})
+        }
+        this.years = years
+      }
+
+      changeDisplayName(){
+        if(!this.hospitalData){
+          return
+        }
+        if(this.hospitalData.hospitalName){
+          return this.hospitalData.hospitalName
+        }else{
+          return "未登録"
+        }
+      }
+
+      openWrapper(){
+        this.$.wrapper.toggle()
+      }
+
+      _computeSort(a, b) {
+        // http://stackoverflow.com/questions/33953938/polymer-1-0-sorting-dom-repeat
+        if (a.$key == b.$key) {
+          return 0;
+        }
+        return a.$key > b.$key ? -1 : 1;
+      }
+
+    }
+
+    window.customElements.define(ReceiptHelper.is, ReceiptHelper);
+  </script>
+</dom-module>
