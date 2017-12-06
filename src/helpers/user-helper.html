@@ -13,6 +13,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../../bower_components/polymerfire/firebase-auth.html">
 <link rel="import" href="../../bower_components/polymerfire/firebase-document.html">
+<link rel="import" href="../../bower_components/polymerfire/firebase-query.html">
+<link rel="import" href="hearing-only-helper.html">
 <link rel="import" href="../shared-styles.html">
 
 <dom-module id="user-helper">
@@ -54,9 +56,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       data="{{userData}}">
     </firebase-document>
 
-    <paper-button class="leftButton wideButton" on-tap="openWrapper"><div class="nameWrapper">[[displayName]]</div></paper-button>
+    <firebase-query
+      disabled$="[[opened]]"
+      id="query"
+      path="users/[[user.uid]]/hearings"
+      order-by-child="patientId"
+      equal-to="[[params]]"
+      data="{{hearings}}">
+    </firebase-query>
 
-    <iron-collapse id="userInfoWrapper">
+    <paper-button class="leftButton wideButton" hidden$="[[opened]]" on-tap="openWrapper"><div class="nameWrapper">[[displayName]]</div></paper-button>
+
+    <iron-collapse id="userInfoWrapper" opened$="[[opened]]">
 
       <div class="categoryWrapper patient">
         <div class="label">ふりがな</div>
@@ -113,7 +124,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <div calss="property">[[userData.hospitalAddress]]</div>
       </div>
 
-      <paper-button raised on-tap="openWrapper" class="wideButton">閉じる</paper-button>
+
+      <h2>この人の通院履歴</h2>
+
+
+      <template is="dom-repeat" items="[[hearings]]" sort="_computeSort">
+        <hearing-only-helper params="[[item.$key]]"></hearing-only-helper>
+      </template>
+
+
+
+
+      <paper-button hidden$="[[opened]]" raised on-tap="openWrapper" class="wideButton">閉じる</paper-button>
+
       
     </iron-collapse>
 
@@ -145,6 +168,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             value: "読み込み中...",
             computed: 'changeDisplayName(userData)'
           },
+          hearings: Object,
+          opened: Object,
         }
       }
 
@@ -218,6 +243,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       openWrapper(){
         this.$.userInfoWrapper.toggle()
+      }
+
+
+      _computeSort(a, b) {
+        // http://stackoverflow.com/questions/33953938/polymer-1-0-sorting-dom-repeat
+        if (a.$key == b.$key) {
+          return 0;
+        }
+        return a.$key > b.$key ? -1 : 1;
       }
 
     }

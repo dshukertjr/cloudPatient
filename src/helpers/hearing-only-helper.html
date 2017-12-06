@@ -15,10 +15,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../../bower_components/paper-input/paper-textarea.html">
 <link rel="import" href="../../bower_components/polymerfire/firebase-auth.html">
 <link rel="import" href="../../bower_components/polymerfire/firebase-document.html">
-<link rel="import" href="user-helper.html">
 <link rel="import" href="../shared-styles.html">
 
-<dom-module id="my-hospital-hearing">
+<dom-module id="hearing-only-helper">
   <template>
     <style include="shared-styles">
       :host {
@@ -108,11 +107,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       data="{{userType}}">
     </firebase-document>
 
-    <paper-button id="openButton" class="leftButton wideButton" on-tap="openWrapper"><div class="nameDateWrapper"><div>[[displayName]]</div><div>[[displayDate]]</div></div></paper-button>
+    <paper-button id="openButton" class="leftButton wideButton" on-tap="openWrapper"><div class="nameDateWrapper"><div>[[hearingData.treatment]]</div><div>[[displayDate]]</div></div></paper-button>
 
     <iron-collapse id="wrapper" class="wrapper">
-
-      <user-helper set-display-name="患者詳細" id="userHelper" opened="true" params="[[hearingData.patientId]]"></user-helper>
 
       <div id="inspectImgWrapper">
         <img id="inspectImg" src="../images/assets/inspect.png">
@@ -175,12 +172,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <p class="answer">[[hearingData.others]]</p>
       </div>
 
-      <paper-textarea id="treatmentHospital" label="治療内容" value="{{hearingData.treatment}}"></paper-textarea>
-
-      <paper-textarea id="commentHospital" label="患者様へのコメント" value="{{hearingData.comment}}"></paper-textarea>
-
-      <paper-input id="priceHospital" label="お会計" value="{{hearingData.price}}"></paper-input>
-
       <div id="treatmentPatient">
         <div>治療内容</div>
         <div>[[hearingData.treatment]]</div>
@@ -196,17 +187,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <div>¥ [[hearingData.price]]</div>
       </div>
 
-      <a id="receiptLink" href="/receipt/[[params]]"><paper-button class="mainBtn" raised>領収書を見る</paper-button></a>
-
-
       <paper-button class="wideButton" id="closeButton" raised on-tap="openWrapper">閉じる</paper-button>
 
     </iron-collapse>
   </template>
 
   <script>
-    class MyHospitalHearing extends Polymer.Element {
-      static get is() { return 'my-hospital-hearing'; }
+    class HearingOnlyHelper extends Polymer.Element {
+      static get is() { return 'hearing-only-helper'; }
 
       static get properties() {
         return {
@@ -230,96 +218,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
       }
 
-      static get observers() {
-        return [
-          '_priceChanged(hearingData.price)',
-          '_treatmentChanged(hearingData.treatment)',
-          '_commentChanged(hearingData.comment)',
-        ]
-      }
-
-      _priceChanged(){
-        if(this.userType != "hospital"){
-          return
-        }
-        if(!this.hearingData.price){
-          return
-        }
-        //input it into patient's database
-        window.firebase.database().ref().child("users/" + this.hearingData.patientId + "/hearings/" + this.params + "/price").set(this.hearingData.price)
-
-        //input it into patient's acumulated database
-        if(this.hearingData.time != null){
-          var d = new Date(this.hearingData.time)
-        }else{
-          var d = new Date()
-        }
-        var year = d.getFullYear() + ""
-        const input = {
-          price: this.hearingData.price,
-          patientName: this.hearingData.patientName,
-        }
-        window.firebase.database().ref().child("users/" + this.hearingData.patientId + "/receipts/" + this.hearingData.hospitalId + "/" + year + "/" + this.params).set(input)
-      }
-
-      _treatmentChanged(){
-        if(this.userType != "hospital"){
-          return
-        }
-        if(!this.hearingData.treatment){
-          return
-        }
-        window.firebase.database().ref().child("users/" + this.hearingData.patientId + "/hearings/" + this.params + "/treatment").set(this.hearingData.treatment)
-      }
-
-      _commentChanged(){
-        if(this.userType != "hospital"){
-          return
-        }
-        if(!this.hearingData.comment){
-          return
-        }
-        window.firebase.database().ref().child("users/" + this.hearingData.patientId + "/hearings/" + this.params + "/comment").set(this.hearingData.comment)
-      }
-
-      togglePrice(){
-        if(this.userType == "patient"){
-          // this.$.pricePatient.style.display = "flex"
-          this.$.pricePatient.hidden = false
-          this.$.priceHospital.hidden = true
-        }else if(this.userType == "hospital"){
-          // this.$.pricePatient.style.display = "none"
-          this.$.pricePatient.hidden = true
-          this.$.priceHospital.hidden = false
-        }
-      }
-
-      toggleTreatment(){
-        if(this.userType == "patient"){
-          this.$.treatmentPatient.hidden = false
-          this.$.treatmentHospital.hidden = true
-        }else if(this.userType == "hospital"){
-          this.$.treatmentPatient.hidden = true
-          this.$.treatmentHospital.hidden = false
-        }
-      }
-
-      toggleComment(){
-        if(this.userType == "patient"){
-          this.$.commentPatient.hidden = false
-          this.$.commentHospital.hidden = true
-        }else if(this.userType == "hospital"){
-          this.$.commentPatient.hidden = true
-          this.$.commentHospital.hidden = false
-        }
-      }
 
       toggleUserHelper(){
-        if(this.userType == "patient"){
-          this.$.userHelper.hidden = true
-        }else{
-          this.$.userHelper.hidden = false
-        }
       }
 
       toggleReceiptLink(){
@@ -332,11 +232,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       changeDisplayName(){
         console.log("hearing data", this.hearingData)
-        this.togglePrice()
-        this.toggleTreatment()
-        this.toggleComment()
-        this.toggleUserHelper()
-        this.toggleReceiptLink()
         // console.log("display name change", this.hearingData)
         if(!this.hearingData){
           // console.log("no hearing data")
@@ -422,6 +317,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     }
 
-    window.customElements.define(MyHospitalHearing.is, MyHospitalHearing);
+    window.customElements.define(HearingOnlyHelper.is, HearingOnlyHelper);
   </script>
 </dom-module>
