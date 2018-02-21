@@ -12,6 +12,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../bower_components/paper-input/paper-textarea.html">
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-toggle-button/paper-toggle-button.html">
 <link rel="import" href="../bower_components/paper-spinner/paper-spinner-lite.html">
 <link rel="import" href="../bower_components/paper-toast/paper-toast.html">
 <link rel="import" href="../bower_components/iron-collapse/iron-collapse.html">
@@ -48,6 +49,22 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         width:100%;
         margin-top:16px;
       }
+
+      .flexSpaceBetween{
+        display:flex;
+        justify-content: space-between;
+        margin:16px 0;
+      }
+
+      .ad{
+        background:#eee;
+        display:flex;
+        justify-content: center;
+        align-items: center;
+        margin:16px auto;
+        height:300px;
+        max-width:400px;
+      }
     </style>
 
     <firebase-auth
@@ -67,6 +84,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       id="userProfile"
       path="/users/[[user.uid]]/profile"
       data="{{userProfile}}">
+    </firebase-document>
+
+    <firebase-document
+      id="ads"
+      path="/ads"
+      data="{{adCode}}">
     </firebase-document>
 
 
@@ -100,6 +123,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           <paper-input id="patientPhoneNumber" value="[[userProfile.patientPhoneNumber]]" label="電話番号" required auto-validate></paper-input>
           <paper-textarea always-float-label id="patientSportsHistory" value="[[userProfile.patientSportsHistory]]" label="スポーツ歴" required auto-validate></paper-textarea>
           <paper-button on-tap="inputPatient" raised class="mainBtn">保存</paper-button>
+
+          <div class="ad">
+            ここに広告を表示
+          </div>
+
           <div>
             <paper-button class="openResetPassword" on-tap="toggleResetPassword">パスワードを変更</paper-button>
           </div>
@@ -126,6 +154,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           <paper-input id="hospitalAddress" value="[[userProfile.hospitalAddress]]" label="住所" required auto-validate></paper-input>
           <paper-input id="hospitalPhoneNumber" value="[[userProfile.hospitalPhoneNumber]]" label="電話番号" required auto-validate></paper-input>
           <paper-button on-tap="inputHospital" raised class="mainBtn">保存</paper-button>
+
+          <div class="ad">
+            ここに広告を表示
+          </div>
+
+
           <div>
             <paper-button class="openResetPassword" on-tap="toggleResetPassword">パスワードを変更</paper-button>
           </div>
@@ -142,6 +176,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           <p>パスワードリセットのためのリンクを登録されているメールアドレスに送信いたします。</p>
           <paper-input id="forgetdPasswordEmail" label="メールアドレス" required auto-validate></paper-input>
           <paper-button on-tap="forgetPassword" raised class="mainBtn">送信</paper-button>
+        </iron-collapse>
+
+        <iron-collapse opened$="[[_isAdmin(userMeta)]]">
+
+          <div class="flexSpaceBetween">
+            <div>患者側広告</div>
+            <paper-toggle-button checked="{{adCode.patient}}"></paper-toggle-button>
+          </div>
+
+          <div class="flexSpaceBetween">
+            <div>病院側広告</div>
+            <paper-toggle-button checked="{{adCode.hospital}}"></paper-toggle-button>
+          </div>
+
         </iron-collapse>
 
 
@@ -173,7 +221,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             type: Object,
             observer: '_userMetaChanged'
           },
-          userProfile: Object
+          userProfile: Object,
+          adCode: Object,
         }
       }
 
@@ -185,6 +234,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           this.$.preloaderWrapper.show()
           this.$.afterLogin.hide()
         }
+      }
+
+      _isAdmin() {
+        if(this.userMeta == "admin") return true
+        return false
       }
 
       resetPassword(){

@@ -230,6 +230,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           this.$.adminUsers.hidden = true
           this.historyLabel = "治療院一覧"
           this.hearingLabel = "通院履歴"
+          this.style.setProperty(`--app-primary-color`, `#81c784`)
         }else if(this.userType == "hospital"){
           this.$.hearingLink.hidden = false
           this.$.historyLink.hidden = false
@@ -238,12 +239,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           this.$.adminUsers.hidden = true
           this.historyLabel = "予診票・患者一覧"
           this.hearingLabel = "通院履歴"
+          this.style.setProperty(`--app-primary-color`, `#4285f4`)
         }else if(this.userType == "admin"){
           this.$.hearingLink.hidden = true
           this.$.historyLink.hidden = true
           this.$.qrLink.hidden = true
           this.$.adminUsers.hidden = false
           this.$.receiptsLink.hidden = true
+          this.style.setProperty(`--app-primary-color`, `#f4b400`)
         }else{
           // not logged in
           this.$.hearingLink.hidden = true
@@ -251,6 +254,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           this.$.qrLink.hidden = true
           this.$.adminUsers.hidden = true
           this.$.receiptsLink.hidden = true
+          this.style.setProperty(`--app-primary-color`, `#82b1ff`)
         }
       }
 

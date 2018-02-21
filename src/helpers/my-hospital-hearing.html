@@ -175,11 +175,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <p class="answer">[[hearingData.others]]</p>
       </div>
 
-      <paper-textarea id="treatmentHospital" label="治療内容" value="{{hearingData.treatment}}"></paper-textarea>
+      <paper-textarea id="treatmentHospital" label="治療内容" always-float-label$="[[hearingData.treatment]]" value="{{hearingData.treatment}}"></paper-textarea>
 
-      <paper-textarea id="commentHospital" label="患者様へのコメント" value="{{hearingData.comment}}"></paper-textarea>
+      <paper-textarea id="commentHospital" always-float-label$="[[hearingData.comment]]" label="患者様へのコメント" value="{{hearingData.comment}}"></paper-textarea>
 
-      <paper-input id="priceHospital" label="お会計" value="{{hearingData.price}}"></paper-input>
+      <paper-input id="priceHospital" always-float-label$="[[hearingData.price]]" label="お会計" value="{{hearingData.price}}"></paper-input>
 
       <div id="treatmentPatient">
         <div>治療内容</div>
