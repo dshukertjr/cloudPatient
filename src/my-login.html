@@ -124,8 +124,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           <paper-textarea always-float-label id="patientSportsHistory" value="[[userProfile.patientSportsHistory]]" label="スポーツ歴" required auto-validate></paper-textarea>
           <paper-button on-tap="inputPatient" raised class="mainBtn">保存</paper-button>
 
-          <div class="ad">
-            ここに広告を表示
+          <div class="ad" hidden$="[[!adCode.patient]]">
+
+            <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+            <!-- テスト用 -->
+            <ins class="adsbygoogle"
+                 style="display:block"
+                 data-ad-client="ca-pub-2390007199405133"
+                 data-ad-slot="8173858283"
+                 data-ad-format="auto"></ins>
+            <script>
+            (adsbygoogle = window.adsbygoogle || []).push({});
+            </script>
+
           </div>
 
           <div>
@@ -155,8 +166,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           <paper-input id="hospitalPhoneNumber" value="[[userProfile.hospitalPhoneNumber]]" label="電話番号" required auto-validate></paper-input>
           <paper-button on-tap="inputHospital" raised class="mainBtn">保存</paper-button>
 
-          <div class="ad">
-            ここに広告を表示
+          <div class="ad" hidden$="[[!adCode.hospital]]">
+            <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+            <!-- テスト用 -->
+            <ins class="adsbygoogle"
+                 style="display:block"
+                 data-ad-client="ca-pub-2390007199405133"
+                 data-ad-slot="8173858283"
+                 data-ad-format="auto"></ins>
+            <script>
+            (adsbygoogle = window.adsbygoogle || []).push({});
+            </script>
           </div>
 
 
